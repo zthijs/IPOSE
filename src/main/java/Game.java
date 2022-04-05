@@ -1,5 +1,7 @@
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.audio.AudioPlayer;
+import com.almasb.fxgl.audio.Music;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.pathfinding.CellMoveComponent;
@@ -23,21 +25,35 @@ public class Game extends GameApplication {
     @Override
     protected void initSettings(GameSettings settings) {
         settings.setTitle("Wozniak defense");
+        settings.setDeveloperMenuEnabled(false);
         settings.setVersion("");
         settings.setAppIcon("wozniak.png");
         settings.setIntroEnabled(false);
         settings.setFullScreenFromStart(true);
         settings.setWidth(1280);
         settings.setHeight(720);
+        settings.setMainMenuEnabled(true);
+
         
     }
 
     protected void initGame() {
         FXGL.getGameScene().setBackgroundRepeat(FXGL.image("gras.png"));
 
+        entityBuilder()
+                .view("gras.png")
+                .zIndex(10)
+                .anchorFromCenter()
+                .scale(2, 2)
+                .buildAndAttach();
+
         for (int[] cords : mudPaths) {
             genMudPiece(cords[0],cords[1]);
         }
+        
+        FXGL.getAudioPlayer().playMusic(FXGL.getAssetLoader().loadMusic("audio.wav"));
+        
+
 
         var grid = new AStarGrid(1280/40,720/40);
         int cellWidth = 40;
@@ -47,35 +63,17 @@ public class Game extends GameApplication {
         ai = entityBuilder()
                 .viewWithBBox(new Rectangle(40,40, Color.CRIMSON))
                 .with(new CellMoveComponent(cellWidth,cellHeight,AIspeed))
-                .with(new AStarMoveComponent(grid))
                 .zIndex(10)
                 .anchorFromCenter()
                 .buildAndAttach();
-                
-        for (int y = 0; y < 720/cellHeight; y++) {
-            for (int x = 0; x < 1280/cellWidth; x++) {
-                final var finalX = x;
-                final var finalY = y;
-                var view = new Rectangle(cellWidth,cellHeight);
-                view.setStroke(Color.LIGHTGRAY);
 
-                var e = entityBuilder()
-                        .at(x * cellWidth, y * cellHeight)
-                        .view(view)
-                        .buildAndAttach();
-
-                e.getViewComponent().addOnClickHandler(event -> {
-                    if (event.getButton() == MouseButton.PRIMARY) {
-                        ai.getComponent(AStarMoveComponent.class).moveToCell(finalX,finalY);
-                    } else if (event.getButton() == MouseButton.SECONDARY) {
-                        grid.get(finalX,finalY).setState(CellState.NOT_WALKABLE);
-                        view.setFill(Color.BLACK);
-                    }
-                });
-            }
-
-        }
         
+
+        for (int[] cord : mudPaths) {
+            ai.translate(cord[0], cord[1]);
+        }
+                
+       
     }
 
     private void genMudPiece(double x, double y){
