@@ -10,7 +10,7 @@ import javafx.scene.text.Text;
 
 public class Game extends GameApplication {
 
-    private int [][] = {}
+    //private int [][] = {}//
     public static void main (String[] args) {
         launch(args);
     }
