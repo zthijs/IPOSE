@@ -16,6 +16,7 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 public class Game extends GameApplication {
     private Entity ai;
     private int [][] mudPaths = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480}};
+    private int [][] mudPaths2 = { {80,80},{160, 80}, {160, 160}, {160, 240}};
     public static void main (String[] args) {
         launch(args);
     }
