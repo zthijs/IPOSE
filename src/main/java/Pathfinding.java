@@ -41,9 +41,8 @@ public class Pathfinding extends GameApplication {
             for (int x = 0; x < 1280/cellWidth; x++) {
                 final var finalX = x;
                 final var finalY = y;
-                var view = new Rectangle(cellWidth,cellHeight,Color.WHITE);
+                var view = new Rectangle(cellWidth,cellHeight);
                 view.setStroke(Color.LIGHTGRAY);
-                view.setStrokeType(StrokeType.INSIDE);
 
                 var e = entityBuilder()
                         .at(x * cellWidth, y * cellHeight)
