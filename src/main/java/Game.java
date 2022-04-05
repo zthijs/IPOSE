@@ -1,16 +1,11 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.texture.Texture;
 
-import javafx.scene.text.Text;
-
 public class Game extends GameApplication {
 
-    //private int [][] = {}//
+    private int [][] mudPaths = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480}};
     public static void main (String[] args) {
         launch(args);
     }
@@ -29,14 +24,10 @@ public class Game extends GameApplication {
 
     protected void initGame() {
         FXGL.getGameScene().setBackgroundRepeat(FXGL.image("gras.png"));
-        genMudPiece(0, 80);
-        genMudPiece(80, 80);
-        genMudPiece(160, 80);
-        genMudPiece(160, 160);
-        genMudPiece(160, 240);
-        genMudPiece(160, 320);
 
-
+        for (int[] cords : mudPaths) {
+            genMudPiece(cords[0],cords[1]);
+        }
         
     }
 
