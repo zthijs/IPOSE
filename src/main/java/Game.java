@@ -56,6 +56,8 @@ public class Game extends GameApplication {
 
         Enemy nee = new Enemy(60, 100, 60, "AIspeed", grid);
 
+        Tower tower = new Tower(100, 100);
+
         grid.forEach(huts -> {
             huts.setState(CellState.NOT_WALKABLE);
         });
@@ -71,6 +73,8 @@ public class Game extends GameApplication {
 
         
     }
+
+
 
     private void genMudPiece(int x, int y){
 
