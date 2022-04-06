@@ -19,7 +19,7 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 
 public class Game extends GameApplication {
     private Entity ai;
-    private int [][] mudPaths = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480}};
+    private int [][] mudPaths = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
     private int [][] mudPaths2 = { {80,80},{160, 80}, {160, 160}, {160, 240}};
     public static void main (String[] args) {
         launch(args);
@@ -38,8 +38,14 @@ public class Game extends GameApplication {
     }
 
     protected void initGame() {
-        FXGL.getGameScene().setBackgroundRepeat(FXGL.image("gras.png"));
+        entityBuilder()
+                .view("gras.png")
+                .zIndex(10)
+                .anchorFromCenter()
+                .scale(2, 2).anchorFromCenter()
+                .buildAndAttach();
 
+        entityBuilder().view("stone.jpg").zIndex(200).at(1000,0).scale(2, 2).buildAndAttach();
 
 
         var grid = new AStarGrid(1280/80,720/80);
@@ -47,34 +53,8 @@ public class Game extends GameApplication {
         int cellHeight = 80;
         int AIspeed = 200;
 
-        ai = entityBuilder()
-                .viewWithBBox(new Rectangle(80,80, Color.CRIMSON))
-                .with(new CellMoveComponent(cellWidth,cellHeight,AIspeed))
-                .with(new AStarMoveComponent(grid))
-                .zIndex(10).at(0,0)
-                .anchorFromCenter()
-                .buildAndAttach();
-                
-        for (int y = 0; y < 720/cellHeight; y++) {
-            for (int x = 0; x < 1280/cellWidth; x++) {
-                final var finalX = x;
-                final var finalY = y;
-                var view = new Rectangle(cellWidth,cellHeight);
-                //view.setStroke(Color.LIGHTGRAY);
 
-                var e = entityBuilder()
-                        .at(x * cellWidth, y * cellHeight)
-                        .view(view)
-                        .buildAndAttach();
-
-                e.getViewComponent().addOnClickHandler(event -> {
-                    if (event.getButton() == MouseButton.PRIMARY) {
-                        ai.getComponent(AStarMoveComponent.class).moveToCell(finalX,finalY);
-                    }
-                });
-            }
-        }
-
+        Enemy nee = new Enemy(60, 100, 60, "AIspeed", grid);
 
         grid.forEach(huts -> {
             huts.setState(CellState.NOT_WALKABLE);
@@ -85,16 +65,22 @@ public class Game extends GameApplication {
             grid.get(cords[0]/cellWidth,cords[1]/cellHeight).setState(CellState.WALKABLE);
         }
 
+        nee.walk(mudPaths[mudPaths.length -1][0],mudPaths[mudPaths.length - 1][1]);
+
 
 
         
     }
 
-    private void genMudPiece(double x, double y){
-        Texture brickTexture = FXGL.getAssetLoader().loadTexture("mud.png");
-        brickTexture.setTranslateX(x);
-        brickTexture.setTranslateY(y);
-        FXGL.getGameScene().addUINode(brickTexture);
+    private void genMudPiece(int x, int y){
+
+        entityBuilder()
+                .view("mud.png")
+                .zIndex(11).at(x,y)
+                .onClick(f->{
+
+                })
+                .buildAndAttach();
     }
 
     @Override
