@@ -1,5 +1,7 @@
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.audio.Audio;
+import com.almasb.fxgl.audio.AudioPlayer;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.components.CollidableComponent;
@@ -11,92 +13,76 @@ import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Duration;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.TimeUnit;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 
 public class Game extends GameApplication {
 
+    private final int CELL_WIDTH = 80;
+    private final int CELL_HEIGHT = 80;
+
+    private final AStarGrid GRID = new AStarGrid(1280/CELL_WIDTH,720/CELL_HEIGHT);
+
     private final int [][] PATH_1 = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
-    private final int [][] PATH_2 = { {80,80},{160, 80}, {160, 160}, {160, 240}};
-    private Entity endpoint;
+    private final int [][] PATH_2 = {{0,640},{80, 640}, {120, 640}, {160, 640},{160,560},{160,480},{160,400}, {240,240},{240,320},{240,400},{240,320},{320,240},{400,240},{480,240},{480,320},{480,240},{480,400},{480,480},{560,480},{640,480},{640,400},{640,320},{640,240},{640,160},{560,160},{400,240},{560,80},{560,0},{640,0},{720,0},{800,0},{880,0},{920,0}};
+
+    public final int [][] TOWERS_1 = {{80, 160},{480, 400},{880, 560}};
 
     public static void main (String[] args) {
         launch(args);
     }
 
     @Override
-    protected void initSettings(GameSettings settings) {
-        settings.setTitle("Wozniak defense");
-        settings.setVersion("");
-        settings.setAppIcon("wozniak.png");
-        settings.setIntroEnabled(false);
-        settings.setFullScreenFromStart(true);
-        settings.setWidth(1280);
-        settings.setHeight(720);
+    protected void initSettings(GameSettings s) {
+        s.setTitle("Wozniak defense");
+        s.setVersion("");
+        s.setAppIcon("wozniak.png");
+        s.setIntroEnabled(false);
+        s.setFullScreenFromStart(true);
+        s.setWidth(1280);
+        s.setHeight(720);
+        s.setMainMenuEnabled(true);
 
     }
 
     protected void initGame() {
-        entityBuilder()
-                .view("gras.png")
-                .zIndex(10)
-                .anchorFromCenter()
-                .scale(2, 2).anchorFromCenter()
-                .buildAndAttach();
 
-        entityBuilder().view("stone.jpg").zIndex(1000).at(1000,0).scale(2, 2).buildAndAttach();
+        // Stel de achtergrond en menu in op specifieke z indexen.
+        entityBuilder().view("gras.png").zIndex(0).scale(2, 2).buildAndAttach();
+        entityBuilder().view("stone.jpg").zIndex(20).at(1000,0).scale(2, 2).buildAndAttach();
 
-
-        int cellWidth = 80;
-        int cellHeight = 80;
-        var grid = new AStarGrid(1280/cellWidth,720/cellHeight);
-
-
-        //Enemy nee = new Enemy(60, 500, 60, "AIspeed", grid);
-
-        grid.forEach(huts -> {
-            huts.setState(CellState.NOT_WALKABLE);
+        // Maak op de grid elke tegel niet toegangbaar.
+        GRID.forEach(tile -> {
+            tile.setState(CellState.NOT_WALKABLE);
         });
+        
+        Enemy nee = new Enemy(60, 500, 60, "AIspeed", GRID);
 
+        // Maak alle tegels op het pad toegangbaar.
         for (int[] cords : PATH_1) {
             genMudPiece(cords[0],cords[1]);
-            grid.get(cords[0]/cellWidth,cords[1]/cellHeight).setState(CellState.WALKABLE);
+            GRID.get(cords[0]/CELL_WIDTH,cords[1]/CELL_HEIGHT).setState(CellState.WALKABLE);
+        }
+
+        // Plaats de torens langs het pad.
+        for (int[] cords: TOWERS_1) {
+            entityBuilder().view("platform.png").zIndex(25).at(cords[0],cords[1]).onClick(v->{
+                System.out.println("Gedrukt");
+                v.setOpacity(0.5);
+            }).buildAndAttach();
         }
 
 
+        nee.walk(PATH_1[PATH_1.length -1][0],PATH_1[PATH_1.length - 1][1]);
 
-        endpoint = FXGL.entityBuilder()
-                .viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT))
-                .zIndex(-100)
-                .at(1040,480)
-                .type(EntityTypes.PATH_END)
-                .with(new CollidableComponent(true))
-                .buildAndAttach();
+        FXGL.entityBuilder().viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT)).at(1040,480)
+        .type(EntityTypes.PATH_END)
+        .with(new CollidableComponent(true))
+        .buildAndAttach();
 
-
-        //level 1
-        startWave(1,10,1000);
-
-        FXGL.getGameTimer().runAtInterval(() -> {
-            Enemy nee = new Enemy(60, 500, 60, "AIspeed", grid);
-            nee.walk(PATH_1[PATH_1.length -1][0],PATH_1[PATH_1.length - 1][1]);
-        }, Duration.millis(1000));
-    }
-
-    private int startWave(int waveNumber, int enemyAmount, int interval){
-        AtomicInteger count = new AtomicInteger();
-        FXGL.getGameTimer().runAtInterval(() -> {
-            count.set(count.get() + 1);
-            Enemy enemy = new Enemy(100, 500, 50, "AIspeed",grid);
-            enemy.walk(PATH_1[PATH_1.length - 1][0], PATH_1[PATH_1.length - 1][1]);
-            if(count.get() >= enemyAmount){
-                return waveNumber;
-            }
-        }, Duration.millis(interval));
 
     }
 
@@ -104,7 +90,7 @@ public class Game extends GameApplication {
 
         entityBuilder()
                 .view("mud.png")
-                .zIndex(11).at(x,y)
+                .zIndex(2).at(x,y)
                 .onClick(f->{
 
                 })
@@ -116,6 +102,7 @@ public class Game extends GameApplication {
         FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.PATH_END) {
             @Override
             protected void onCollision(Entity enemy, Entity endpoint) {
+                FXGL.play("beep.wav");
                 enemy.removeFromWorld();
                 FXGL.inc("score", -5);
                 FXGL.inc("health",-1);
@@ -157,8 +144,12 @@ public class Game extends GameApplication {
     //key input
     @Override
     protected void initInput() {
-        FXGL.onKey(KeyCode.W, () -> {
-            //entity.translateY(-7);
+        var sound = FXGL.getAssetLoader().loadSound("audio.wav");
+        boolean playing = false;
+
+        FXGL.onKey(KeyCode.P, () -> {
+            FXGL.getAudioPlayer().playSound(sound);
+    
         });
     }
 }
