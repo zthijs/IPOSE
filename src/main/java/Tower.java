@@ -1,4 +1,7 @@
-public class Tower  {
+abstract class Tower  {
+
     int value;
     int damage;
+
+
 }
