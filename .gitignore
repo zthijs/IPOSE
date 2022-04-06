@@ -65,6 +65,7 @@ atlassian-ide-plugin.xml
 .idea/sonarlint/
 
 target/
+system/
 
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
