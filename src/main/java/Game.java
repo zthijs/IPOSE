@@ -8,7 +8,9 @@ import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
 import com.almasb.fxgl.texture.Texture;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -18,7 +20,6 @@ import java.util.Map;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 
 public class Game extends GameApplication {
-    private Entity ai;
     private int [][] mudPaths = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
     private int [][] mudPaths2 = { {80,80},{160, 80}, {160, 160}, {160, 240}};
     public static void main (String[] args) {
@@ -51,7 +52,6 @@ public class Game extends GameApplication {
         var grid = new AStarGrid(1280/80,720/80);
         int cellWidth = 80;
         int cellHeight = 80;
-        int AIspeed = 200;
 
 
         Enemy nee = new Enemy(60, 100, 60, "AIspeed", grid);
@@ -83,41 +83,67 @@ public class Game extends GameApplication {
                 .buildAndAttach();
     }
 
+
+    //fix dit, moet EntityType & Entity opgeven, moet var van klasse aanpassen
     @Override
     protected void initPhysics(){
         FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.BULLET, EntityTypes.ENEMY) {
             @Override
             protected void onCollision(Entity bullet, Entity enemy) {
                 bullet.removeFromWorld();
-                //line hieronder wil je schade toepassen bij de enemy entity
-                //if statement -> enemy.removeFromWorld() als enemy.health <= 0?
+
+                //bullet.getDamage bestaat nog niet, tijdelijk gecomment hieronder
+                //enemy.setHealth(enemy.getHealth() - bullet.getDamage());
+
+                //if(enemy.getHealth() <= 0) {
+                //    enemy.remove();
+                //}
+
+
+
                 FXGL.inc("score", +1);
+
             }
         });
     }
 
+    private void makeLabel(String labelContents, int Xcoord, int Ycoord, boolean var){
+        Label label = new Label(labelContents);
+        label.setStyle(
+                "-fx-font-family: 'Comic Sans MS'; " +
+                "-fx-font-size: 20; " +
+                "-fx-text-fill: white;");
+        label.setTranslateX(Xcoord);
+        label.setTranslateY(Ycoord);
+        FXGL.getGameScene().addUINode(label);
+        if (var == true) {
+            label.textProperty().bind(FXGL.getWorldProperties().intProperty(labelContents).asString());
+        }
+    }
+
     @Override
     protected void initUI(){
-        //method voor het maken van tekstelementen binnen UI -> DRY
-        Label scoreText = new Label("Score: ");
-        scoreText.setTranslateX(5);
-        //scoreText.setTranslateY(0);
-
-        Label score = new Label();
-        score.setTranslateX(40);
-        //score.setTranslateY(0);
-
-        score.textProperty().bind(FXGL.getWorldProperties().intProperty("score").asString());
-
-        FXGL.getGameScene().addUINode(score);
-        FXGL.getGameScene().addUINode(scoreText);
+        makeLabel("Score: ",1016,12,false);
+        makeLabel("Health: ",1016,44,false);
+        makeLabel("Money: ",1016,76,false);
+        makeLabel("score",1090,12,true);
+        makeLabel("health",1090,44,true);
+        makeLabel("money",1090,76,true);
     }
 
     @Override
     protected void initGameVars(Map<String, Object> vars){
         vars.put("score",0);
+        vars.put("health",20);
+        vars.put("money",100);
     }
 
-
+    //key input
+    @Override
+    protected void initInput() {
+        FXGL.onKey(KeyCode.W, () -> {
+            //entity.translateY(-7);
+        });
+    }
 }
 
