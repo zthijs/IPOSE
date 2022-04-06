@@ -141,8 +141,7 @@ public class Game extends GameApplication {
     //key input
     @Override
     protected void initInput() {
-        FXGL.onKey(KeyCode.W, () -> {
-            //entity.translateY(-7);
+        FXGL.onKey(KeyCode.F5, () -> {
         });
     }
 }
