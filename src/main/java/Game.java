@@ -1,10 +1,15 @@
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.pathfinding.CellState;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
+import com.almasb.fxgl.physics.CollisionHandler;
+
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.util.Map;
 
@@ -39,7 +44,7 @@ public class Game extends GameApplication {
                 .scale(2, 2).anchorFromCenter()
                 .buildAndAttach();
 
-        entityBuilder().view("stone.jpg").zIndex(200).at(1000,0).scale(2, 2).buildAndAttach();
+        entityBuilder().view("stone.jpg").zIndex(1).at(1000,0).scale(2, 2).buildAndAttach();
 
 
         var grid = new AStarGrid(1280/80,720/80);
@@ -47,7 +52,7 @@ public class Game extends GameApplication {
         int cellHeight = 80;
 
 
-        Enemy nee = new Enemy(60, 100, 60, "AIspeed", grid);
+        Enemy nee = new Enemy(60, 500, 60, "AIspeed", grid);
 
         grid.forEach(huts -> {
             huts.setState(CellState.NOT_WALKABLE);
@@ -60,7 +65,13 @@ public class Game extends GameApplication {
 
         nee.walk(PATH_1[PATH_1.length -1][0],PATH_1[PATH_1.length - 1][1]);
 
-
+        entityBuilder()
+                .viewWithBBox(new Rectangle(80,80, Color.RED))
+                .zIndex(1000)
+                .anchorFromCenter()
+                .type(EntityTypes.PATH_END)
+                .at(1040, 480)
+                .buildAndAttach();
 
 
     }
@@ -76,29 +87,17 @@ public class Game extends GameApplication {
                 .buildAndAttach();
     }
 
-
-    //fix dit, moet EntityType & Entity opgeven, moet var van klasse aanpassen
-    /*@Override
+    @Override
     protected void initPhysics(){
-        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.BULLET, EntityTypes.ENEMY) {
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.BULLET, EntityTypes.PATH_END) {
             @Override
             protected void onCollision(Entity bullet, Entity enemy) {
-                bullet.removeFromWorld();
-
-                //bullet.getDamage bestaat nog niet, tijdelijk gecomment hieronder
-                //enemy.setHealth(enemy.getHealth() - bullet.getDamage());
-
-                //if(enemy.getHealth() <= 0) {
-                //    enemy.remove();
-                //}
-
-
-
-                FXGL.inc("score", +1);
+                
+                System.out.println("nee");
 
             }
         });
-    }*/
+    }
 
     private void makeLabel(String labelContents, int Xcoord, int Ycoord, boolean var){
         Label label = new Label(labelContents);
