@@ -1,3 +1,3 @@
 public enum EntityTypes {
-    BULLET, ENEMY, PATHEND
+    BULLET, ENEMY, PATH_END
 }

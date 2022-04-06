@@ -1,6 +1,5 @@
 import com.almasb.fxgl.dsl.EntityBuilder;
 import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.pathfinding.CellMoveComponent;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
@@ -22,9 +21,9 @@ public class Enemy{
 
     public  Enemy(int health, int speed, int score, String type, AStarGrid grid) {
 
-        this.health = 50;
-        this.speed = 2;
-        this.score = 10;
+        this.health = health;
+        this.speed = speed;
+        this.score = score;
         this.type = type;
 
         final double MINIMIZE_FACTOR_TO_SATISFACTION = 0.3;
@@ -35,7 +34,6 @@ public class Enemy{
                 .with(new AStarMoveComponent(grid))
                 .zIndex(120).at(-160,0).anchorFromCenter()
                 .type(EntityTypes.ENEMY)
-                .with(new CollidableComponent(true))
                 .buildAndAttach();
     }
 

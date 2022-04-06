@@ -2,17 +2,12 @@ import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.entity.components.CollidableComponent;
-import com.almasb.fxgl.pathfinding.CellMoveComponent;
 import com.almasb.fxgl.pathfinding.CellState;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
-import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
-import com.almasb.fxgl.texture.Texture;
-import javafx.scene.Scene;
+
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -21,9 +16,9 @@ import java.util.Map;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 
 public class Game extends GameApplication {
-    private int [][] mudPaths = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
-    private int [][] mudPaths2 = { {80,80},{160, 80}, {160, 160}, {160, 240}};
-    private Entity endpoint;
+
+    private final int [][] PATH_1 = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
+    private final int [][] PATH_2 = { {80,80},{160, 80}, {160, 160}, {160, 240}};
 
     public static void main (String[] args) {
         launch(args);
@@ -49,21 +44,12 @@ public class Game extends GameApplication {
                 .scale(2, 2).anchorFromCenter()
                 .buildAndAttach();
 
-        entityBuilder().view("stone.jpg").zIndex(200).at(1000,0).scale(2, 2).buildAndAttach();
+        entityBuilder().view("stone.jpg").zIndex(1).at(1000,0).scale(2, 2).buildAndAttach();
 
-        //eindpunt
-        endpoint = FXGL.entityBuilder()
-                .viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT))
-                .zIndex(-100)
-                .at(1040,480)
-                .type(EntityTypes.PATHEND)
-                .with(new CollidableComponent(true))
-                .buildAndAttach();
 
+        var grid = new AStarGrid(1280/80,720/80);
         int cellWidth = 80;
         int cellHeight = 80;
-        var grid = new AStarGrid(1280/cellWidth,720/cellHeight);
-
 
 
         Enemy nee = new Enemy(60, 500, 60, "AIspeed", grid);
@@ -72,14 +58,20 @@ public class Game extends GameApplication {
             huts.setState(CellState.NOT_WALKABLE);
         });
 
-        for (int[] cords : mudPaths) {
+        for (int[] cords : PATH_1) {
             genMudPiece(cords[0],cords[1]);
             grid.get(cords[0]/cellWidth,cords[1]/cellHeight).setState(CellState.WALKABLE);
         }
 
-        nee.walk(mudPaths[mudPaths.length -1][0],mudPaths[mudPaths.length - 1][1]);
+        nee.walk(PATH_1[PATH_1.length -1][0],PATH_1[PATH_1.length - 1][1]);
 
-
+        entityBuilder()
+                .viewWithBBox(new Rectangle(80,80, Color.RED))
+                .zIndex(1000)
+                .anchorFromCenter()
+                .type(EntityTypes.PATH_END)
+                .at(1040, 480)
+                .buildAndAttach();
 
 
     }
@@ -95,33 +87,16 @@ public class Game extends GameApplication {
                 .buildAndAttach();
     }
 
-
-    //fix dit, moet EntityType & Entity opgeven, moet var van klasse aanpassen
     @Override
     protected void initPhysics(){
-        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.PATHEND) {
-            @Override
-            protected void onCollision(Entity enemy, Entity endpoint) {
-                enemy.removeFromWorld();
-                FXGL.inc("score", -5);
-                FXGL.inc("health",-1);
-            }
-        });
-        /*FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.BULLET, EntityTypes.ENEMY) {
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.BULLET, EntityTypes.PATH_END) {
             @Override
             protected void onCollision(Entity bullet, Entity enemy) {
-                bullet.removeFromWorld();
-
-                //bullet.getDamage bestaat nog niet, tijdelijk gecomment hieronder
-                //enemy.setHealth(enemy.getHealth() - bullet.getDamage());
-
-                //if(enemy.getHealth() <= 0) {
-                //    enemy.remove();
-                //}
-
+                
+                System.out.println("nee");
 
             }
-        });*/
+        });
     }
 
     private void makeLabel(String labelContents, int Xcoord, int Ycoord, boolean var){
@@ -133,7 +108,7 @@ public class Game extends GameApplication {
         label.setTranslateX(Xcoord);
         label.setTranslateY(Ycoord);
         FXGL.getGameScene().addUINode(label);
-        if (var) {
+        if (var == true) {
             label.textProperty().bind(FXGL.getWorldProperties().intProperty(labelContents).asString());
         }
     }
