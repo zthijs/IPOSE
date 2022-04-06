@@ -35,7 +35,7 @@ public class Game extends GameApplication {
         settings.setFullScreenFromStart(true);
         settings.setWidth(1280);
         settings.setHeight(720);
-        
+
     }
 
     protected void initGame() {
@@ -69,7 +69,7 @@ public class Game extends GameApplication {
 
 
 
-        
+
     }
 
     private void genMudPiece(int x, int y){
@@ -85,7 +85,7 @@ public class Game extends GameApplication {
 
 
     //fix dit, moet EntityType & Entity opgeven, moet var van klasse aanpassen
-    @Override
+    /*@Override
     protected void initPhysics(){
         FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.BULLET, EntityTypes.ENEMY) {
             @Override
@@ -105,7 +105,7 @@ public class Game extends GameApplication {
 
             }
         });
-    }
+    }*/
 
     private void makeLabel(String labelContents, int Xcoord, int Ycoord, boolean var){
         Label label = new Label(labelContents);
