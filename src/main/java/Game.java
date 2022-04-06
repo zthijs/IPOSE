@@ -1,13 +1,14 @@
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
-import com.almasb.fxgl.audio.Audio;
-import com.almasb.fxgl.audio.AudioPlayer;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.pathfinding.CellState;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
+import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
+import static com.almasb.fxgl.dsl.FXGL.spawn;
 
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
@@ -15,7 +16,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 
@@ -35,6 +35,8 @@ public class Game extends GameApplication {
         launch(args);
     }
 
+    private final WozniakEntityFactory wozniakEntityFactory = new WozniakEntityFactory();
+
     @Override
     protected void initSettings(GameSettings s) {
         s.setTitle("Wozniak defense");
@@ -50,16 +52,18 @@ public class Game extends GameApplication {
 
     protected void initGame() {
 
+        FXGL.getGameWorld().addEntityFactory(this.wozniakEntityFactory);
+
         // Stel de achtergrond en menu in op specifieke z indexen.
-        entityBuilder().view("gras.png").zIndex(0).scale(2, 2).buildAndAttach();
-        entityBuilder().view("stone.jpg").zIndex(20).at(1000,0).scale(2, 2).buildAndAttach();
+        spawn("background");
+        spawn("stoneMenu");
 
         // Maak op de grid elke tegel niet toegangbaar.
         GRID.forEach(tile -> {
             tile.setState(CellState.NOT_WALKABLE);
         });
         
-        Enemy nee = new Enemy(60, 500, 60, "AIspeed", GRID);
+        spawn("enemy", new SpawnData().put("grid", GRID).put("speed", 100)).getComponent(AStarMoveComponent.class).moveToCell(3,3);
 
         // Maak alle tegels op het pad toegangbaar.
         for (int[] cords : PATH_1) {
@@ -75,8 +79,6 @@ public class Game extends GameApplication {
             }).buildAndAttach();
         }
 
-
-        nee.walk(PATH_1[PATH_1.length -1][0],PATH_1[PATH_1.length - 1][1]);
 
         FXGL.entityBuilder().viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT)).at(1040,480)
         .type(EntityTypes.PATH_END)
@@ -144,11 +146,14 @@ public class Game extends GameApplication {
     //key input
     @Override
     protected void initInput() {
-        var sound = FXGL.getAssetLoader().loadSound("audio.wav");
-        boolean playing = false;
+        var music = FXGL.getAssetLoader().loadMusic("audio.wav");
 
         FXGL.onKey(KeyCode.P, () -> {
-            FXGL.getAudioPlayer().playSound(sound);
+            FXGL.getAudioPlayer().playMusic(music);
+    
+        });
+        FXGL.onKey(KeyCode.L, () -> {
+            FXGL.getAudioPlayer().stopMusic(music);
     
         });
     }
