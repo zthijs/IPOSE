@@ -33,7 +33,7 @@ public class Enemy{
                 .viewWithBBox(HEIKO_IMAGE).scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
                 .with(new CellMoveComponent(80,80,speed))
                 .with(new AStarMoveComponent(grid))
-                .zIndex(120).at(-160,0).anchorFromCenter()
+                .zIndex(5).at(-160,0).anchorFromCenter()
                 .type(EntityTypes.ENEMY)
                 .with(new CollidableComponent(true))
                 .buildAndAttach();
