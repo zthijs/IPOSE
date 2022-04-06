@@ -11,8 +11,10 @@ import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 
@@ -54,7 +56,7 @@ public class Game extends GameApplication {
         var grid = new AStarGrid(1280/cellWidth,720/cellHeight);
 
 
-        Enemy nee = new Enemy(60, 500, 60, "AIspeed", grid);
+        //Enemy nee = new Enemy(60, 500, 60, "AIspeed", grid);
 
         grid.forEach(huts -> {
             huts.setState(CellState.NOT_WALKABLE);
@@ -65,7 +67,7 @@ public class Game extends GameApplication {
             grid.get(cords[0]/cellWidth,cords[1]/cellHeight).setState(CellState.WALKABLE);
         }
 
-        nee.walk(PATH_1[PATH_1.length -1][0],PATH_1[PATH_1.length - 1][1]);
+
 
         endpoint = FXGL.entityBuilder()
                 .viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT))
@@ -75,6 +77,26 @@ public class Game extends GameApplication {
                 .with(new CollidableComponent(true))
                 .buildAndAttach();
 
+
+        //level 1
+        startWave(1,10,1000);
+
+        FXGL.getGameTimer().runAtInterval(() -> {
+            Enemy nee = new Enemy(60, 500, 60, "AIspeed", grid);
+            nee.walk(PATH_1[PATH_1.length -1][0],PATH_1[PATH_1.length - 1][1]);
+        }, Duration.millis(1000));
+    }
+
+    private int startWave(int waveNumber, int enemyAmount, int interval){
+        AtomicInteger count = new AtomicInteger();
+        FXGL.getGameTimer().runAtInterval(() -> {
+            count.set(count.get() + 1);
+            Enemy enemy = new Enemy(100, 500, 50, "AIspeed",grid);
+            enemy.walk(PATH_1[PATH_1.length - 1][0], PATH_1[PATH_1.length - 1][1]);
+            if(count.get() >= enemyAmount){
+                return waveNumber;
+            }
+        }, Duration.millis(interval));
 
     }
 
