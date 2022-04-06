@@ -40,17 +40,15 @@ public class Game extends GameApplication {
     protected void initGame() {
         FXGL.getGameScene().setBackgroundRepeat(FXGL.image("gras.png"));
 
-        for (int[] cords : mudPaths) {
-            genMudPiece(cords[0],cords[1]);
-        }
 
-        var grid = new AStarGrid(1280/40,720/40);
-        int cellWidth = 40;
-        int cellHeight = 40;
+
+        var grid = new AStarGrid(1280/80,720/80);
+        int cellWidth = 80;
+        int cellHeight = 80;
         int AIspeed = 200;
 
         ai = entityBuilder()
-                .viewWithBBox(new Rectangle(40,40, Color.CRIMSON))
+                .viewWithBBox(new Rectangle(80,80, Color.CRIMSON))
                 .with(new CellMoveComponent(cellWidth,cellHeight,AIspeed))
                 .with(new AStarMoveComponent(grid))
                 .zIndex(10)
@@ -62,7 +60,7 @@ public class Game extends GameApplication {
                 final var finalX = x;
                 final var finalY = y;
                 var view = new Rectangle(cellWidth,cellHeight);
-                view.setStroke(Color.LIGHTGRAY);
+                //view.setStroke(Color.LIGHTGRAY);
 
                 var e = entityBuilder()
                         .at(x * cellWidth, y * cellHeight)
@@ -72,14 +70,22 @@ public class Game extends GameApplication {
                 e.getViewComponent().addOnClickHandler(event -> {
                     if (event.getButton() == MouseButton.PRIMARY) {
                         ai.getComponent(AStarMoveComponent.class).moveToCell(finalX,finalY);
-                    } else if (event.getButton() == MouseButton.SECONDARY) {
-                        grid.get(finalX,finalY).setState(CellState.NOT_WALKABLE);
-                        view.setFill(Color.BLACK);
                     }
                 });
             }
-
         }
+
+        grid.forEach(huts -> {
+            huts.setState(CellState.NOT_WALKABLE);
+        });
+
+        for (int[] cords : mudPaths) {
+            genMudPiece(cords[0],cords[1]);
+            grid.get(cords[0]/cellWidth,cords[1]/cellHeight).setState(CellState.WALKABLE);
+        }
+
+
+
         
     }
 
