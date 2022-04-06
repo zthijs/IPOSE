@@ -33,7 +33,7 @@ public class Enemy{
                 .with(new CellMoveComponent(80,80,speed))
                 .with(new AStarMoveComponent(grid))
                 .zIndex(120).at(-160,0).anchorFromCenter()
-                .type(EntityTypes.ENEMY)
+                //.type(EntityTypes.ENEMY)
                 .buildAndAttach();
     }
 
