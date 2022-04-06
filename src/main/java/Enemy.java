@@ -12,7 +12,9 @@ public class Enemy {
     private  int score;
 
     private String type;
-    private static final String HEIKO_IMAGE = "heiko.png"
+    private static final String HEIKO_IMAGE = "heiko.png";
+    private static final String VINCENT_IMAGE = "vincent.png";
+    private static final String CHARLOTTE_IMAGE = "charlotte.png";
 
 
     private Entity ai;
@@ -26,7 +28,7 @@ public class Enemy {
         final double MINIMIZE_FACTOR_TO_SATISFACTION = 0.3;
 
         this.ai = entityBuilder()
-                .viewWithBBox(ENEMY_IMAGE).scale(0.3,0.3)
+                .viewWithBBox(HEIKO_IMAGE).scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
                 .with(new CellMoveComponent(80,80,speed))
                 .with(new AStarMoveComponent(grid))
                 .zIndex(120).at(-160,0).anchorFromCenter()
