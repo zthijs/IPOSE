@@ -20,6 +20,7 @@ public class Enemy {
     private Entity ai;
 
     public  Enemy(int health, int speed, int score, String type, AStarGrid grid) {
+
         this.health = 50;
         this.speed = 2;
         this.score = 10;
