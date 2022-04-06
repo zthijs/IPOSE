@@ -51,7 +51,7 @@ public class Game extends GameApplication {
                 .viewWithBBox(new Rectangle(80,80, Color.CRIMSON))
                 .with(new CellMoveComponent(cellWidth,cellHeight,AIspeed))
                 .with(new AStarMoveComponent(grid))
-                .zIndex(10)
+                .zIndex(10).at(0,0)
                 .anchorFromCenter()
                 .buildAndAttach();
                 
