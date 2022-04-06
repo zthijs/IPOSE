@@ -2,6 +2,7 @@ import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.pathfinding.CellState;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.physics.CollisionHandler;
@@ -16,7 +17,7 @@ import java.util.Map;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 
 public class Game extends GameApplication {
-
+    public static final int Z_AXIS_PLAYING = 100;
     private final int [][] PATH_1 = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
     private final int [][] PATH_2 = { {80,80},{160, 80}, {160, 160}, {160, 240}};
 
@@ -67,9 +68,10 @@ public class Game extends GameApplication {
 
         entityBuilder()
                 .viewWithBBox(new Rectangle(80,80, Color.RED))
-                .zIndex(1000)
+                .zIndex(Z_AXIS_PLAYING)
                 .anchorFromCenter()
                 .type(EntityTypes.PATH_END)
+                .with(new CollidableComponent(true))
                 .at(1040, 480)
                 .buildAndAttach();
 
@@ -89,7 +91,7 @@ public class Game extends GameApplication {
 
     @Override
     protected void initPhysics(){
-        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.BULLET, EntityTypes.PATH_END) {
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.PATH_END) {
             @Override
             protected void onCollision(Entity bullet, Entity enemy) {
                 
