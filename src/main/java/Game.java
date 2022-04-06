@@ -19,7 +19,7 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 
 public class Game extends GameApplication {
     private Entity ai;
-    private int [][] mudPaths = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480}};
+    private int [][] mudPaths = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
     private int [][] mudPaths2 = { {80,80},{160, 80}, {160, 160}, {160, 240}};
     public static void main (String[] args) {
         launch(args);
@@ -53,33 +53,8 @@ public class Game extends GameApplication {
         int cellHeight = 80;
         int AIspeed = 200;
 
-        ai = entityBuilder()
-                .viewWithBBox("wozniak.png")
-                .with(new CellMoveComponent(cellWidth,cellHeight,AIspeed))
-                .with(new AStarMoveComponent(grid))
-                .zIndex(120).at(-80,80)                .anchorFromCenter()
-                .buildAndAttach();
-                
-        for (int y = 0; y < 720/cellHeight; y++) {
-            for (int x = 0; x < 1280/cellWidth; x++) {
-                final var finalX = x;
-                final var finalY = y;
-                var view = new Rectangle(cellWidth,cellHeight);
-                //view.setStroke(Color.LIGHTGRAY);
 
-                var e = entityBuilder()
-                        .at(x * cellWidth, y * cellHeight)
-                        .view(view)
-                        .buildAndAttach();
-
-                e.getViewComponent().addOnClickHandler(event -> {
-                    if (event.getButton() == MouseButton.PRIMARY) {
-                        ai.getComponent(AStarMoveComponent.class).moveToCell(finalX,finalY);
-                    }
-                });
-            }
-        }
-
+        Enemy nee = new Enemy(60, 100, 60, "AIspeed", grid);
 
         grid.forEach(huts -> {
             huts.setState(CellState.NOT_WALKABLE);
@@ -89,6 +64,8 @@ public class Game extends GameApplication {
             genMudPiece(cords[0],cords[1]);
             grid.get(cords[0]/cellWidth,cords[1]/cellHeight).setState(CellState.WALKABLE);
         }
+
+        nee.walk(mudPaths[mudPaths.length -1][0],mudPaths[mudPaths.length - 1][1]);
 
 
 
@@ -101,7 +78,7 @@ public class Game extends GameApplication {
                 .view("mud.png")
                 .zIndex(11).at(x,y)
                 .onClick(f->{
-                    ai.getComponent(AStarMoveComponent.class).moveToCell(x/80,y/80);
+
                 })
                 .buildAndAttach();
     }
