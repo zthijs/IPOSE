@@ -38,8 +38,14 @@ public class Game extends GameApplication {
     }
 
     protected void initGame() {
-        FXGL.getGameScene().setBackgroundRepeat(FXGL.image("gras.png"));
+        entityBuilder()
+                .view("gras.png")
+                .zIndex(10)
+                .anchorFromCenter()
+                .scale(2, 2).anchorFromCenter()
+                .buildAndAttach();
 
+        entityBuilder().view("stone.jpg").zIndex(200).at(1000,0).scale(2, 2).buildAndAttach();
 
 
         var grid = new AStarGrid(1280/80,720/80);
@@ -48,11 +54,10 @@ public class Game extends GameApplication {
         int AIspeed = 200;
 
         ai = entityBuilder()
-                .viewWithBBox(new Rectangle(80,80, Color.CRIMSON))
+                .viewWithBBox("wozniak.png")
                 .with(new CellMoveComponent(cellWidth,cellHeight,AIspeed))
                 .with(new AStarMoveComponent(grid))
-                .zIndex(10)
-                .anchorFromCenter()
+                .zIndex(120).at(-80,80)                .anchorFromCenter()
                 .buildAndAttach();
                 
         for (int y = 0; y < 720/cellHeight; y++) {
@@ -90,11 +95,15 @@ public class Game extends GameApplication {
         
     }
 
-    private void genMudPiece(double x, double y){
-        Texture brickTexture = FXGL.getAssetLoader().loadTexture("mud.png");
-        brickTexture.setTranslateX(x);
-        brickTexture.setTranslateY(y);
-        FXGL.getGameScene().addUINode(brickTexture);
+    private void genMudPiece(int x, int y){
+
+        entityBuilder()
+                .view("mud.png")
+                .zIndex(11).at(x,y)
+                .onClick(f->{
+                    ai.getComponent(AStarMoveComponent.class).moveToCell(x/80,y/80);
+                })
+                .buildAndAttach();
     }
 
     @Override
