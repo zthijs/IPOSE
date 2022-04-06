@@ -1,5 +1,6 @@
 import com.almasb.fxgl.dsl.EntityBuilder;
 import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.pathfinding.CellMoveComponent;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
@@ -33,7 +34,8 @@ public class Enemy{
                 .with(new CellMoveComponent(80,80,speed))
                 .with(new AStarMoveComponent(grid))
                 .zIndex(120).at(-160,0).anchorFromCenter()
-                //.type(EntityTypes.ENEMY)
+                .type(EntityTypes.ENEMY)
+                .with(new CollidableComponent(true))
                 .buildAndAttach();
     }
 
