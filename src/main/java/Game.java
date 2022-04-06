@@ -75,6 +75,7 @@ public class Game extends GameApplication {
             }
         }
 
+
         grid.forEach(huts -> {
             huts.setState(CellState.NOT_WALKABLE);
         });
