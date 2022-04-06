@@ -12,7 +12,7 @@ public class Enemy {
     private  int score;
 
     private String type;
-    private static final String HEIKO_IMAGE = "heiko.png"
+    private static final String HEIKO_IMAGE = "heiko.png";
 
 
     private Entity ai;
