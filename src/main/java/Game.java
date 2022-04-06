@@ -45,7 +45,9 @@ public class Game extends GameApplication {
         entityBuilder().view("stone.jpg").zIndex(200).at(1000,0).scale(2, 2).buildAndAttach();
 
         for (int[] cords: TOWERS_1) {
-            entityBuilder().view("platform.png").zIndex(210).at(cords[0],cords[1]).buildAndAttach();
+            entityBuilder().view("platform.png").zIndex(210).at(cords[0],cords[1]).onClick(v->{
+                v.setVisible(!v.isVisible());
+            }).buildAndAttach();
         }
 
 
@@ -56,8 +58,8 @@ public class Game extends GameApplication {
 
         Enemy nee = new Enemy(60, 100, 60, "AIspeed", grid);
 
-        grid.forEach(huts -> {
-            huts.setState(CellState.NOT_WALKABLE);
+        grid.forEach(v -> {
+            v.setState(CellState.NOT_WALKABLE);
         });
 
         for (int[] cords : PATH_1) {
