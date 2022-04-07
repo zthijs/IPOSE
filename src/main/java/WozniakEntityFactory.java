@@ -105,6 +105,7 @@ public class WozniakEntityFactory implements EntityFactory {
         if(closest.size() < 1) {
             return entityBuilder(data).build();
         }else {
+            FXGL.play("Gunfire.wav");
             return entityBuilder(data)
             .type(EntityTypes.BULLET)
             .viewWithBBox(new Rectangle(10, 10, Color.BLACK))
@@ -114,6 +115,7 @@ public class WozniakEntityFactory implements EntityFactory {
             .with(new OffscreenCleanComponent())
             .build();
         }
+
         
     }
 
