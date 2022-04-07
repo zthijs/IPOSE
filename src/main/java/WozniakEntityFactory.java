@@ -41,7 +41,7 @@ public class WozniakEntityFactory implements EntityFactory {
     public Entity stoneMenu(SpawnData data){
         return entityBuilder(data)
             .view("stone.jpg")
-            .zIndex(20)
+            .zIndex(30)
             .at(1000,0)
             .scale(2, 2)
             .build();
@@ -121,7 +121,7 @@ public class WozniakEntityFactory implements EntityFactory {
     public Entity tower1(SpawnData data){
         FXGL.getGameTimer().runAtInterval(()->{
             spawn("bullet", data.getX() + 40,data.getY() + 40);
-        }, Duration.millis(2000));
+        }, Duration.millis(3000));
 
         return entityBuilder(data)
             .view("tower1.png")
@@ -143,7 +143,7 @@ public class WozniakEntityFactory implements EntityFactory {
 
         FXGL.getGameTimer().runAtInterval(()->{
             spawn("bullet", data.getX() + 40,data.getY() + 40);
-        }, Duration.millis(1000));
+        }, Duration.millis(2000));
 
         return entityBuilder(data)
             .view("tower2.png")
@@ -164,7 +164,7 @@ public class WozniakEntityFactory implements EntityFactory {
     public Entity tower3(SpawnData data){
         FXGL.getGameTimer().runAtInterval(()->{
             spawn("bullet", data.getX() + 40,data.getY() + 40);
-        }, Duration.millis(500));
+        }, Duration.millis(1000));
         
 
         return entityBuilder(data)
