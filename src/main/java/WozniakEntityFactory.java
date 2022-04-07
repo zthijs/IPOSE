@@ -12,7 +12,10 @@ import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import static com.almasb.fxgl.dsl.FXGL.spawn;
 
+import java.util.List;
+
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
@@ -97,27 +100,28 @@ public class WozniakEntityFactory implements EntityFactory {
 
     @Spawns("bullet")
     public Entity newBullet(SpawnData data) {
-
-
-        Point2D closest = FXGL.getGameWorld().getSingleton(EntityTypes.ENEMY).getPosition();
-
-        return entityBuilder(data)
-                .type(EntityTypes.BULLET)
-                .viewWithBBox(new Rectangle(10, 10, Color.BLACK))
-                .collidable()
-                .zIndex(6000)
-                .with(new ProjectileComponent(closest, 10000))
-                .with(new OffscreenCleanComponent())
-                .build();
-
-
+        Point2D nee = new Point2D(data.getX(), data.getY());
+        List<Entity> closest = FXGL.getGameWorld().getEntitiesFiltered(e -> e.isType(EntityTypes.ENEMY));
+        if(closest.size() < 1) {
+            return entityBuilder(data).build();
+        }else {
+            return entityBuilder(data)
+            .type(EntityTypes.BULLET)
+            .viewWithBBox(new Rectangle(10, 10, Color.BLACK))
+            .collidable()
+            .zIndex(6000)
+            .with(new ProjectileComponent(closest.get(0).getPosition().subtract(nee), 10000))
+            .with(new OffscreenCleanComponent())
+            .build();
+        }
+        
     }
 
     @Spawns("tower1")
     public Entity tower1(SpawnData data){
         FXGL.getGameTimer().runAtInterval(()->{
             spawn("bullet", data.getX() + 40,data.getY() + 40);
-        }, Duration.millis(500));
+        }, Duration.millis(2000));
 
         return entityBuilder(data)
             .view("tower1.png")
@@ -136,6 +140,11 @@ public class WozniakEntityFactory implements EntityFactory {
 
     @Spawns("tower2")
     public Entity tower2(SpawnData data){
+
+        FXGL.getGameTimer().runAtInterval(()->{
+            spawn("bullet", data.getX() + 40,data.getY() + 40);
+        }, Duration.millis(1000));
+
         return entityBuilder(data)
             .view("tower2.png")
             .anchorFromCenter()
@@ -153,6 +162,11 @@ public class WozniakEntityFactory implements EntityFactory {
 
     @Spawns("tower3")
     public Entity tower3(SpawnData data){
+        FXGL.getGameTimer().runAtInterval(()->{
+            spawn("bullet", data.getX() + 40,data.getY() + 40);
+        }, Duration.millis(500));
+        
+
         return entityBuilder(data)
             .view("tower3.png")
             .anchorFromCenter()
