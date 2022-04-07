@@ -1,27 +1,23 @@
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
-import com.almasb.fxgl.audio.Audio;
-import com.almasb.fxgl.audio.AudioPlayer;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.pathfinding.CellState;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
+import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
+import static com.almasb.fxgl.dsl.FXGL.spawn;
 
-import com.almasb.fxgl.time.TimerAction;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Duration;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
-import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameTimer;
 
 public class Game extends GameApplication {
 
@@ -39,6 +35,8 @@ public class Game extends GameApplication {
         launch(args);
     }
 
+    private final WozniakEntityFactory wozniakEntityFactory = new WozniakEntityFactory();
+
     @Override
     protected void initSettings(GameSettings s) {
         s.setTitle("Wozniak defense");
@@ -54,65 +52,39 @@ public class Game extends GameApplication {
 
     protected void initGame() {
 
+        FXGL.getGameWorld().addEntityFactory(this.wozniakEntityFactory);
+
         // Stel de achtergrond en menu in op specifieke z indexen.
-        entityBuilder().view("gras.png").zIndex(0).scale(2, 2).buildAndAttach();
-        entityBuilder().view("stone.jpg").zIndex(20).at(1000,0).scale(2, 2).buildAndAttach();
+        spawn("background");
+        spawn("stoneMenu");
 
         // Maak op de grid elke tegel niet toegangbaar.
         GRID.forEach(tile -> {
             tile.setState(CellState.NOT_WALKABLE);
         });
         
-        Enemy nee = new Enemy(60, 500, 60, "AIspeed", GRID);
-
         // Maak alle tegels op het pad toegangbaar.
         for (int[] cords : PATH_1) {
-            genMudPiece(cords[0],cords[1]);
+            spawn("mudPiece", cords[0], cords[1]);
             GRID.get(cords[0]/CELL_WIDTH,cords[1]/CELL_HEIGHT).setState(CellState.WALKABLE);
         }
 
         // Plaats de torens langs het pad.
         for (int[] cords: TOWERS_1) {
-            entityBuilder().view("platform.png").zIndex(25).at(cords[0],cords[1]).onClick(v->{
-                System.out.println("Gedrukt");
-                v.setOpacity(0.5);
-            }).buildAndAttach();
+            spawn("platform", cords[0], cords[1]);
         }
 
+        spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(3,3);
 
-        nee.walk(PATH_1[PATH_1.length -1][0],PATH_1[PATH_1.length - 1][1]);
 
-        FXGL.entityBuilder().viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT)).at(1040,480)
-        .type(EntityTypes.PATH_END)
-        .with(new CollidableComponent(true))
-        .buildAndAttach();
 
-        startWave(1,10,1000);
+
     }
 
-    private void startWave(int waveNumber, int enemyAmount, int interval){
-        AtomicInteger count = new AtomicInteger();
-        TimerAction timerAction = getGameTimer().runAtInterval(() -> {
-            count.set(count.get() + 1);
-            Enemy enemy = new Enemy(100, 500, 50, "AIspeed",GRID);
-            enemy.walk(PATH_1[PATH_1.length - 1][0], PATH_1[PATH_1.length - 1][1]);
-            if(count.get() >= enemyAmount){
-                System.out.println("hoi");
-                //timerAction.expire();
-            }
-        }, Duration.millis(interval));
+    private Entity spawnEnemy(){
+        return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 100));
     }
 
-    private void genMudPiece(int x, int y){
-
-        entityBuilder()
-                .view("mud.png")
-                .zIndex(2).at(x,y)
-                .onClick(f->{
-
-                })
-                .buildAndAttach();
-    }
 
     @Override
     protected void initPhysics(){
@@ -161,11 +133,14 @@ public class Game extends GameApplication {
     //key input
     @Override
     protected void initInput() {
-        var sound = FXGL.getAssetLoader().loadSound("audio.wav");
-        boolean playing = false;
+        var music = FXGL.getAssetLoader().loadMusic("audio.wav");
 
         FXGL.onKey(KeyCode.P, () -> {
-            FXGL.getAudioPlayer().playSound(sound);
+            FXGL.getAudioPlayer().playMusic(music);
+    
+        });
+        FXGL.onKey(KeyCode.L, () -> {
+            FXGL.getAudioPlayer().stopMusic(music);
     
         });
     }
