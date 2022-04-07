@@ -62,6 +62,7 @@ public class Game extends GameApplication {
         spawn("background");
         spawn("stoneMenu");
         spawn("pathEnd",PATH_1[PATH_1.length - 1][0], PATH_1[PATH_1.length - 1][1]);
+        //spawn("tower");
 
         // Maak op de grid elke tegel niet toegangbaar.
         GRID.forEach(tile -> {

@@ -82,4 +82,12 @@ public class WozniakEntityFactory implements EntityFactory {
             .zIndex(25)
             .build();
     }
+
+    @Spawns("tower")
+    public Entity tower(SpawnData data){
+        return entityBuilder(data)
+                .view("tower1.png")
+                .zIndex(100)
+                .build();
+    }
 }
