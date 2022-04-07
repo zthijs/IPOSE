@@ -98,8 +98,9 @@ public class WozniakEntityFactory implements EntityFactory {
     @Spawns("bullet")
     public Entity newBullet(SpawnData data) {
 
-        Point2D closest = FXGL.getGameWorld().getSingleton(EntityTypes.ENEMY).getPosition();
-        
+
+        Point2D closest = FXGL.getGameWorld().getSingleton(EntityTypes.ENEMY).getPosition().subtract(tower1().getPosition())
+
         return entityBuilder(data)
                 .type(EntityTypes.BULLET)
                 .viewWithBBox(new Rectangle(10, 10, Color.BLACK))
@@ -108,6 +109,8 @@ public class WozniakEntityFactory implements EntityFactory {
                 .with(new ProjectileComponent(closest, 10000))
                 .with(new OffscreenCleanComponent())
                 .build();
+
+
     }
 
     @Spawns("tower1")
