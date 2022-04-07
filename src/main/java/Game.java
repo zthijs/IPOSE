@@ -80,10 +80,7 @@ public class Game extends GameApplication {
             spawn("platform", cords[0], cords[1]);
         }
 
-
-
-        //spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(3,3);
-
+        startWave(1,10,1000);
         startWave(1,10,1000);
 
 
@@ -104,6 +101,8 @@ public class Game extends GameApplication {
             }
         }, Duration.millis(interval));
     }
+
+    //getGameTimer().runAtInterval(()->{})
 
 
     @Override
