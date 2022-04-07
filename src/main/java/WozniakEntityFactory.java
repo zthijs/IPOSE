@@ -97,23 +97,24 @@ public class WozniakEntityFactory implements EntityFactory {
 
     @Spawns("bullet")
     public Entity newBullet(SpawnData data) {
-        Entity closest = FXGL.getGameWorld().getClosestEntity(parent, e -> e.isType(EntityTypes.ENEMY));
 
+        Point2D closest = FXGL.getGameWorld().getSingleton(EntityTypes.ENEMY).getPosition();
+        
         return entityBuilder(data)
                 .type(EntityTypes.BULLET)
-                .viewWithBBox(new Rectangle(10, 2, Color.BLACK))
+                .viewWithBBox(new Rectangle(10, 10, Color.BLACK))
                 .collidable()
-                .with(new ProjectileComponent(direction, 1000))
+                .zIndex(6000)
+                .with(new ProjectileComponent(closest, 10000))
                 .with(new OffscreenCleanComponent())
                 .build();
     }
 
     @Spawns("tower1")
     public Entity tower1(SpawnData data){
-
         FXGL.getGameTimer().runAtInterval(()->{
-            spawn("bullet");
-        }, Duration.seconds(1));
+            spawn("bullet", data.getX() + 40,data.getY() + 40);
+        }, Duration.millis(500));
 
         return entityBuilder(data)
             .view("tower1.png")
