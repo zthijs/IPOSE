@@ -9,15 +9,19 @@ import com.almasb.fxgl.pathfinding.CellState;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.physics.CollisionHandler;
 
+import com.almasb.fxgl.time.TimerAction;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameTimer;
 
 public class Game extends GameApplication {
 
@@ -83,7 +87,20 @@ public class Game extends GameApplication {
         .with(new CollidableComponent(true))
         .buildAndAttach();
 
+        startWave(1,10,1000);
+    }
 
+    private void startWave(int waveNumber, int enemyAmount, int interval){
+        AtomicInteger count = new AtomicInteger();
+        TimerAction timerAction = getGameTimer().runAtInterval(() -> {
+            count.set(count.get() + 1);
+            Enemy enemy = new Enemy(100, 500, 50, "AIspeed",GRID);
+            enemy.walk(PATH_1[PATH_1.length - 1][0], PATH_1[PATH_1.length - 1][1]);
+            if(count.get() >= enemyAmount){
+                System.out.println("hoi");
+                //timerAction.expire();
+            }
+        }, Duration.millis(interval));
     }
 
     private void genMudPiece(int x, int y){
