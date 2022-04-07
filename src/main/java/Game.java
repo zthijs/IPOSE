@@ -98,9 +98,8 @@ public class Game extends GameApplication {
                 spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
             }
         }, Duration.millis(interval));
-    }
 
-    //getGameTimer().runAtInterval(()->{})
+    }
 
 
     @Override
@@ -138,13 +137,19 @@ public class Game extends GameApplication {
         makeLabel("score",1090,12,true);
         makeLabel("health",1090,44,true);
         makeLabel("money",1090,76,true);
+
+        makeLabel("Toren 1: 50", 1016, 120, false);
+        makeLabel("Toren 2: 100", 1016, 145, false);
+        makeLabel("Toren 3: 150", 1016, 170, false);
+
+
     }
 
     @Override
     protected void initGameVars(Map<String, Object> vars){
         vars.put("score",0);
         vars.put("health",20);
-        vars.put("money",100);
+        vars.put("money",5000);
     }
 
     //key input
