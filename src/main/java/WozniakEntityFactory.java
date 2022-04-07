@@ -5,7 +5,6 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
-import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.pathfinding.CellMoveComponent;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
@@ -14,6 +13,7 @@ import static com.almasb.fxgl.dsl.FXGL.spawn;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 public class WozniakEntityFactory implements EntityFactory {
 
@@ -52,7 +52,7 @@ public class WozniakEntityFactory implements EntityFactory {
             .viewWithBBox(HEIKO_IMAGE).scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
             .with(new CellMoveComponent(80,80,speed))
             .with(new AStarMoveComponent(grid))
-            .zIndex(15)
+            .zIndex(20)
             .anchorFromCenter()
             .collidable()
             .type(EntityTypes.ENEMY)
@@ -84,27 +84,68 @@ public class WozniakEntityFactory implements EntityFactory {
             .view("platform.png")
             .zIndex(25)
             .onClick(v->{
-                v.removeFromWorld();
-                spawn("tower1", v.getX(), v.getY());
+                if(FXGL.geti("money") >= 50){
+                    FXGL.inc("money", -50);
+                    v.removeFromWorld();
+                    spawn("tower1", v.getX()-40, v.getY()-40);
+                }
             })
+            .build();
+    }
+
+    @Spawns("bullet")
+    public Entity bullet(SpawnData data){
+        return entityBuilder(data)
+            .type(EntityTypes.BULLET)
             .build();
     }
 
     @Spawns("tower1")
     public Entity tower1(SpawnData data){
+
+        FXGL.getGameTimer().runAtInterval(()->{
+            System.out.println("yeet");
+        }, Duration.seconds(2));
+
         return entityBuilder(data)
             .view("tower1.png")
             .zIndex(25)
-            .scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
+            .scale(0.5, 0.5)
+            .anchorFromCenter()
+            .onClick(v->{
+                if(FXGL.geti("money") >= 100){
+                    FXGL.inc("money", -100);
+                    v.removeFromWorld();
+                    spawn("tower2", v.getX() - 40, v.getY()-40);
+                }
+            })
             .build();
     }
 
     @Spawns("tower2")
     public Entity tower2(SpawnData data){
         return entityBuilder(data)
-            .view("tower1.png")
+            .view("tower2.png")
+            .anchorFromCenter()
             .zIndex(25)
-            .scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
+            .onClick(v->{
+                if(FXGL.geti("money") >= 150){
+                    FXGL.inc("money", -150);
+                    v.removeFromWorld();
+                    spawn("tower3", v.getX() + 60, v.getY());
+                }
+            })
+            .scale(0.5, 0.5)
+            .build();
+    }
+
+    @Spawns("tower3")
+    public Entity tower3(SpawnData data){
+        return entityBuilder(data)
+            .view("tower3.png")
+            .anchorFromCenter()
+            .zIndex(25)
+            .scale(0.3, 0.3)
             .build();
     }
 }
