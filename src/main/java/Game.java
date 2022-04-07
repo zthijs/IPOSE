@@ -36,17 +36,20 @@ public class Game extends GameApplication {
     private final AStarGrid GRID = new AStarGrid(1280/CELL_WIDTH,720/CELL_HEIGHT);
 
     private int currentWave;
+    private int killcount;
 
     private final int [][] PATH_1 = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
     private final int [][] PATH_2 = {{0,640},{80, 640}, {120, 640}, {160, 640},{160,560},{160,480},{160,400}, {240,240},{240,320},{240,400},{240,320},{320,240},{400,240},{480,240},{480,320},{480,240},{480,400},{480,480},{560,480},{640,480},{640,400},{640,320},{640,240},{640,160},{560,160},{400,240},{560,80},{560,0},{640,0},{720,0},{800,0},{880,0},{920,0}};
 
-    public final int [][] TOWERS_1 = {{80, 160},{480, 400},{880, 560}};
+    public final int [][] TOWERS_1 = {{80, 160},{480, 400},{880, 560},{320,160},{720,320}};
 
+    //nodig voor gameEnd
     private boolean gameActive = true;
 
     ArrayList<Player> scores = new ArrayList<>();
 
     public static void main (String[] args) {
+      
         launch(args);
     }
 
@@ -73,6 +76,7 @@ public class Game extends GameApplication {
         spawn("background");
         spawn("stoneMenu");
         spawn("pathEnd",PATH_1[PATH_1.length - 1][0], PATH_1[PATH_1.length - 1][1]);
+        //spawn("projectile");
 
         // Maak op de grid elke tegel niet toegangbaar.
         GRID.forEach(tile -> {
@@ -90,7 +94,7 @@ public class Game extends GameApplication {
             spawn("platform", cords[0], cords[1]);
         }
 
-        endGame();
+        gameEnd();
 
         startWave(10,1000,0);
         startWave(8,1600,35);
@@ -99,9 +103,10 @@ public class Game extends GameApplication {
         startWave(100,500,35+28+31+36);
     }
 
-    private void endGame(){
+    //stopt het spel bij 0 health, of wanneer het maximaal aantal enemies dood of ontsnapt is
+    private void gameEnd(){
         FXGL.getGameTimer().runAtInterval(() -> {
-            if (FXGL.geti("health") <= 0 && gameActive == true){
+            if ((FXGL.geti("health") <= 0 && gameActive) || killcount == 10){
                 gameActive = false;
                 getDialogService().showInputBox("Je bent dood! Je hebt een score van " + FXGL.geti("score") + " punten! Wat is je naam", answer -> {
                     System.out.println(answer);
@@ -127,17 +132,21 @@ getDialogService().showBox("This is a customizable box", content, btnClose);
     }
 
     private void startWave(int enemyAmount, int interval, int delay){
-        if (gameActive == true){
+        if (gameActive){
             AtomicInteger count = new AtomicInteger();
-            FXGL.runOnce(() -> {
-                FXGL.inc("wave",1);
-                FXGL.run(() -> {
-                    count.set(count.get() + 1);
-                    spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
-                }, Duration.millis(interval), enemyAmount);
-            }, Duration.seconds(delay));
-        }
+
+                FXGL.runOnce(() -> {
+                    FXGL.inc("wave",1);
+                    FXGL.run(() -> {
+                        if (gameActive) {
+                            count.set(count.get() + 1);
+                            spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
+                        }
+                    }, Duration.millis(interval), enemyAmount);
+                }, Duration.seconds(delay));
+            }
     }
+
 
     @Override
     protected void initPhysics(){
@@ -146,6 +155,7 @@ getDialogService().showBox("This is a customizable box", content, btnClose);
             protected void onCollision(Entity enemy, Entity path_end) {
                 FXGL.play("beep.wav");
                 enemy.removeFromWorld();
+                killcount++;
                 FXGL.inc("health",-1);
             }
         });
@@ -159,6 +169,7 @@ getDialogService().showBox("This is a customizable box", content, btnClose);
 
                 bull.removeFromWorld();
                 enemy.removeFromWorld();
+                killcount++;
                 FXGL.inc("score",5);
                 FXGL.inc("money",10);
             }
