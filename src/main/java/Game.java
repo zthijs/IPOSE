@@ -1,3 +1,4 @@
+import com.almasb.fxgl.app.FXGLApplication;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
@@ -8,228 +9,225 @@ import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
 
-import com.almasb.fxgl.time.TimerAction;
-
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 
-import java.sql.Array;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Timer;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
-import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
-import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameTimer;
 
 public class Game extends GameApplication {
 
-    private final int CELL_WIDTH = 80;
-    private final int CELL_HEIGHT = 80;
+	private final int CELL_WIDTH = 80;
+	private final int CELL_HEIGHT = 80;
 
-    private final AStarGrid GRID = new AStarGrid(1280/CELL_WIDTH,720/CELL_HEIGHT);
+	private final AStarGrid GRID = new AStarGrid(1280 / CELL_WIDTH, 720 / CELL_HEIGHT);
 
-    private int currentWave;
-    private int killcount;
+	private final int [][] PATH = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
+    
+    public final int [][] TOWERS = {{80, 400},{480, 340},{880, 160}};
 
-    private final int [][] PATH_1 = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
-    private final int [][] PATH_2 = {{0,640},{80, 640}, {120, 640}, {160, 640},{160,560},{160,480},{160,400}, {240,240},{240,320},{240,400},{240,320},{320,240},{400,240},{480,240},{480,320},{480,240},{480,400},{480,480},{560,480},{640,480},{640,400},{640,320},{640,240},{640,160},{560,160},{400,240},{560,80},{560,0},{640,0},{720,0},{800,0},{880,0},{920,0}};
+	//nodig voor gameEnd
+	private boolean gameActive = true;
 
-    public final int [][] TOWERS_1 = {{80, 160},{480, 400},{880, 560},{320,160},{720,320}};
+	public static void main(String[] args) {
 
-    //nodig voor gameEnd
-    private boolean gameActive = true;
+		launch(args);
+	}
 
-    ArrayList<Player> scores = new ArrayList<>();
+	private final WozniakEntityFactory wozniakEntityFactory = new WozniakEntityFactory();
 
-    public static void main (String[] args) {
-      
-        launch(args);
-    }
+	@Override
+	protected void initSettings(GameSettings s) {
+		s.setTitle("Wozniak defense");
+		s.setVersion("");
+		s.setAppIcon("wozniak.png");
+		s.setIntroEnabled(false);
+		s.setFullScreenFromStart(true);
+		s.setWidth(1280);
+		s.setHeight(720);
+		s.setMainMenuEnabled(true);
+		s.setSceneFactory(new UISceneFactory());
 
-    private final WozniakEntityFactory wozniakEntityFactory = new WozniakEntityFactory();
+	}
 
-    @Override
-    protected void initSettings(GameSettings s) {
-        s.setTitle("Wozniak defense");
-        s.setVersion("");
-        s.setAppIcon("wozniak.png");
-        s.setIntroEnabled(false);
-        s.setFullScreenFromStart(true);
-        s.setWidth(1280);
-        s.setHeight(720);
-        s.setMainMenuEnabled(false);
+	protected void initGame() {
 
-    }
+		FXGL.getGameWorld().addEntityFactory(this.wozniakEntityFactory);
 
-    protected void initGame() {
+		// Stel de achtergrond en menu in op specifieke z indexen.
+		spawn("background");
+		spawn("stoneMenu");
+		spawn("pathEnd", PATH[PATH.length - 1][0], PATH[PATH.length - 1][1]);
 
-        FXGL.getGameWorld().addEntityFactory(this.wozniakEntityFactory);
+		// Maak op de grid elke tegel niet toegangbaar.
+		GRID.forEach(tile -> {
+			tile.setState(CellState.NOT_WALKABLE);
+		});
 
-        // Stel de achtergrond en menu in op specifieke z indexen.
-        spawn("background");
-        spawn("stoneMenu");
-        spawn("pathEnd",PATH_1[PATH_1.length - 1][0], PATH_1[PATH_1.length - 1][1]);
-        //spawn("projectile");
+		// Maak alle tegels op het pad toegangbaar.
+		for (int[] cords: PATH) {
+			spawn("mudPiece", cords[0], cords[1]);
+			GRID.get(cords[0] / CELL_WIDTH, cords[1] / CELL_HEIGHT).setState(CellState.WALKABLE);
+		}
 
-        // Maak op de grid elke tegel niet toegangbaar.
-        GRID.forEach(tile -> {
-            tile.setState(CellState.NOT_WALKABLE);
-        });
-        
-        // Maak alle tegels op het pad toegangbaar.
-        for (int[] cords : PATH_1) {
-            spawn("mudPiece", cords[0], cords[1]);
-            GRID.get(cords[0]/CELL_WIDTH,cords[1]/CELL_HEIGHT).setState(CellState.WALKABLE);
-        }
+		// Plaats de torens langs het pad.
+		for (int[] cords: TOWERS) {
+			spawn("platform", cords[0], cords[1]);
+		}
 
-        // Plaats de torens langs het pad.
-        for (int[] cords: TOWERS_1) {
-            spawn("platform", cords[0], cords[1]);
-        }
+		startWave(10, 1000, 0, 100);
+		startWave(8, 500, 35, 200);
+		startWave(20, 300, 53, 100);
+		startWave(30, 700, 85, 150);
+        startWave(40, 300, 120, 100);
+		startWave(50, 300, 130, 100);
 
-        gameEnd();
+	}
 
-        startWave(10,1000,0);
-        startWave(8,1600,35);
-        startWave(16,1000,35+28);
-        startWave(30,700,35+28+31);
-        startWave(100,500,35+28+31+36);
-    }
+	private Entity spawnEnemy(int speed) {
+		return spawn("enemy", new SpawnData(-160, 0).put("grid", GRID).put("speed", speed));
+	}
 
-    //stopt het spel bij 0 health, of wanneer het maximaal aantal enemies dood of ontsnapt is
-    private void gameEnd(){
-        FXGL.getGameTimer().runAtInterval(() -> {
-            if ((FXGL.geti("health") <= 0 && gameActive) || killcount == 10){
-                gameActive = false;
-                getDialogService().showInputBox("Je bent dood! Je hebt een score van " + FXGL.geti("score") + " punten! Wat is je naam", answer -> {
-                    System.out.println(answer);
-                    scores.add(new Player(answer, FXGL.geti("score")));
+	private void startWave(int enemyAmount, int interval, int delay, int aiSpeed) {
+		if (gameActive) {
+			AtomicInteger count = new AtomicInteger();
 
-                    VBox content = new VBox();
+			FXGL.runOnce(() -> {
+				FXGL.inc("wave", 1);
+				FXGL.run(() -> {
+					if (gameActive) {
+						count.set(count.get() + 1);
+						spawnEnemy(aiSpeed).getComponent(AStarMoveComponent.class).moveToCell(PATH[PATH.length - 1][0] / 80, PATH[PATH.length - 1][1] / 80);
+					}
+				}, Duration.millis(interval), enemyAmount);
+			}, Duration.seconds(delay));
+		}
+	}
 
-                    for (Player p : scores) {
-                        content.getChildren().add(getUIFactoryService().newText(p.getName() + " - " + p.getScore()));  
+	public void onUpdate(double tpf) {
+		if (FXGL.geti("health")<= 0) {
+			gameActive = false;
+			getDialogService().showInputBox("Je bent dood! Je hebt een score van " + FXGL.geti("score") + " punten! Wat is je naam?", answer -> {
+                VBox content = new VBox();
+
+                try {
+                    FileWriter myWriter = new FileWriter("data.txt", true);
+                    myWriter.write(answer + "," + FXGL.geti("score") + "\n");
+                    myWriter.close();
+                  } catch (IOException e) {
+                    getDialogService().showErrorBox("Er ging wat mis met het score bord", ()->{});
+                }
+
+                try {
+                    Scanner scanner = new Scanner(new File("data.txt"));
+                    while (scanner.hasNextLine()) {
+                        String line = scanner.nextLine();
+                        content.getChildren().add(getUIFactoryService().newText(line.split(",")[0] + " - " + line.split(",")[1]));
                     }
-                    
-Button btnClose = getUIFactoryService().newButton("Sluit");
-btnClose.setPrefWidth(300);
+                } catch (Exception e) {
+                    getDialogService().showErrorBox("Er ging wat mis met het score bord", ()->{});
+                }
+                
+				Button btnClose = getUIFactoryService().newButton("Stop spel");
+				btnClose.setOnAction(a -> {
+					
+                    System.exit(0);
 
-getDialogService().showBox("This is a customizable box", content, btnClose);
-                });
-            }
-        }, Duration.millis(100));
-    }
+				});
+				btnClose.setPrefWidth(300);
 
-    private Entity spawnEnemy(){
-        return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 100));
-    }
+				getDialogService().showBox("Score bord:", content, btnClose);
+			});
+		}
+	}
 
-    private void startWave(int enemyAmount, int interval, int delay){
-        if (gameActive){
-            AtomicInteger count = new AtomicInteger();
+	@Override
+	protected void initPhysics() {
+		FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.PATH_END) {
+			@Override
+			protected void onCollision(Entity enemy, Entity path_end) {
+				FXGL.play("beep.wav");
+				enemy.removeFromWorld();
+				FXGL.inc("health", -1);
+			}
+		});
 
-                FXGL.runOnce(() -> {
-                    FXGL.inc("wave",1);
-                    FXGL.run(() -> {
-                        if (gameActive) {
-                            count.set(count.get() + 1);
-                            spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
-                        }
-                    }, Duration.millis(interval), enemyAmount);
-                }, Duration.seconds(delay));
-            }
-    }
+		FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.BULLET) {
+			@Override
+			protected void onCollision(Entity enemy, Entity bull) {
+				FXGL.inc("score", 5);
+				FXGL.inc("money", 10);
 
+				bull.removeFromWorld();
+				enemy.removeFromWorld();
+			}
+		});
+	}
 
-    @Override
-    protected void initPhysics(){
-        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.PATH_END) {
-            @Override
-            protected void onCollision(Entity enemy, Entity path_end) {
-                FXGL.play("beep.wav");
-                enemy.removeFromWorld();
-                killcount++;
-                FXGL.inc("health",-1);
-            }
-        });
+	private void makeLabel(String labelContents, int Xcoord, int Ycoord, boolean
+		var) {
+		Label label = new Label(labelContents);
+		label.setStyle(
+			"-fx-font-size: 20; " +
+			"-fx-text-fill: white;");
+		label.setFont(Font.loadFont("resources/fonts/pixel.ttf", 20));
+		label.setTranslateX(Xcoord);
+		label.setTranslateY(Ycoord);
+		FXGL.getGameScene().addUINode(label);
+		if (var) {
+			label.textProperty().bind(FXGL.getWorldProperties().intProperty(labelContents).asString());
+		}
+	}
 
-        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.BULLET) {
-            @Override
-            protected void onCollision(Entity enemy, Entity bull) {
-                System.out.println("beep");
-                FXGL.inc("score", 5);
-                FXGL.inc("money", 25);
+	@Override
+	protected void initUI() {
+		makeLabel("Score: ", 1016, 12, false);
+		makeLabel("Health: ", 1016, 44, false);
+		makeLabel("Money: ", 1016, 76, false);
+		makeLabel("Level: ", 1016, 300, false);
 
-                bull.removeFromWorld();
-                enemy.removeFromWorld();
-                killcount++;
-                FXGL.inc("score",5);
-                FXGL.inc("money",10);
-            }
-        });
-    }
+		makeLabel("score", 1090, 12, true);
+		makeLabel("health", 1090, 44, true);
+		makeLabel("money", 1090, 76, true);
+		makeLabel("wave", 1090, 300, true);
 
-    private void makeLabel(String labelContents, int Xcoord, int Ycoord, boolean var){
-        Label label = new Label(labelContents);
-        label.setStyle(
-                "-fx-font-family: 'Comic Sans MS'; " +
-                "-fx-font-size: 20; " +
-                "-fx-text-fill: white;");
-        label.setTranslateX(Xcoord);
-        label.setTranslateY(Ycoord);
-        FXGL.getGameScene().addUINode(label);
-        if (var) {
-            label.textProperty().bind(FXGL.getWorldProperties().intProperty(labelContents).asString());
-        }
-    }
+		makeLabel("Toren 1: 50", 1016, 120, false);
+		makeLabel("Toren 2: 100", 1016, 152, false);
+		makeLabel("Toren 3: 200", 1016, 184, false);
+	}
 
-    @Override
-    protected void initUI(){
-        makeLabel("Score: ",1016,12,false);
-        makeLabel("Health: ",1016,44,false);
-        makeLabel("Money: ",1016,76,false);
-        makeLabel("Wave: ",1016,300,false);
+	@Override
+	protected void initGameVars(Map<String, Object> vars) {
+		vars.put("score", 0);
+		vars.put("health", 10);
+		vars.put("money", 50);
+		vars.put("wave", 0);
+	}
 
-        makeLabel("score",1090,12,true);
-        makeLabel("health",1090,44,true);
-        makeLabel("money",1090,76,true);
-        makeLabel("wave",1090,300,true);
+	//key input
+	@Override
+	protected void initInput() {
+		var music = FXGL.getAssetLoader().loadMusic("audio.wav");
+		FXGL.getAudioPlayer().playMusic(music);
 
-        makeLabel("Toren 1: 50",1016,120,false);
-        makeLabel("Toren 2: 100",1016,152,false);
-        makeLabel("Toren 3: 200",1016,184,false);
-    }
+		FXGL.onKey(KeyCode.P, () -> {
+			FXGL.getAudioPlayer().playMusic(music);
 
-    @Override
-    protected void initGameVars(Map<String, Object> vars){
-        vars.put("score",0);
-        vars.put("health",0);
-        vars.put("money",150);
-        vars.put("wave",0);
-    }
+		});
+		FXGL.onKey(KeyCode.L, () -> {
+			FXGL.getAudioPlayer().stopMusic(music);
 
-
-    //key input
-    @Override
-    protected void initInput() {
-        var music = FXGL.getAssetLoader().loadMusic("audio.wav");
-
-        FXGL.onKey(KeyCode.P, () -> {
-            FXGL.getAudioPlayer().playMusic(music);
-    
-        });
-        FXGL.onKey(KeyCode.L, () -> {
-            FXGL.getAudioPlayer().stopMusic(music);
-    
-        });
-    }
+		});
+	}
 }
-
-

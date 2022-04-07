@@ -13,18 +13,16 @@ import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import static com.almasb.fxgl.dsl.FXGL.spawn;
 
 import java.util.List;
+import java.util.Random;
 
 import javafx.geometry.Point2D;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 public class WozniakEntityFactory implements EntityFactory {
 
-    private static final String HEIKO_IMAGE = "heiko.png";
-    private static final String VINCENT_IMAGE = "vincent.png";
-    private static final String CHARLOTTE_IMAGE = "charlotte.png";
+    private static final String [] IMAGES = {"heiko.png","vincent.png", "charlotte.png"};
 
     final double MINIMIZE_FACTOR_TO_SATISFACTION = 0.3;
 
@@ -54,7 +52,7 @@ public class WozniakEntityFactory implements EntityFactory {
         int speed = data.get("speed");
 
         return entityBuilder(data)
-            .viewWithBBox(HEIKO_IMAGE).scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
+            .viewWithBBox(IMAGES[new Random().nextInt(IMAGES.length)]).scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
             .with(new CellMoveComponent(80,80,speed))
             .with(new AStarMoveComponent(grid))
             .zIndex(20)
@@ -91,8 +89,11 @@ public class WozniakEntityFactory implements EntityFactory {
             .onClick(v->{
                 if(FXGL.geti("money") >= 50){
                     FXGL.inc("money", -50);
+                    FXGL.play("build.wav");
                     v.removeFromWorld();
-                    spawn("tower1", v.getX()-40, v.getY()-40);
+                    spawn("tower1", v.getX() - 40, v.getY()-40);
+                }else{
+                    FXGL.play("notallowed.wav");
                 }
             })
             .build();
@@ -100,6 +101,7 @@ public class WozniakEntityFactory implements EntityFactory {
 
     @Spawns("bullet")
     public Entity newBullet(SpawnData data) {
+        
         Point2D nee = new Point2D(data.getX(), data.getY());
         List<Entity> closest = FXGL.getGameWorld().getEntitiesFiltered(e -> e.isType(EntityTypes.ENEMY));
         if(closest.size() < 1) {
@@ -108,10 +110,10 @@ public class WozniakEntityFactory implements EntityFactory {
             FXGL.play("Gunfire.wav");
             return entityBuilder(data)
             .type(EntityTypes.BULLET)
-            .viewWithBBox(new Rectangle(10, 10, Color.BLACK))
+            .viewWithBBox("bullit.png")
             .collidable()
             .zIndex(6000)
-            .with(new ProjectileComponent(closest.get(0).getPosition().subtract(nee), 10000))
+            .with(new ProjectileComponent(closest.get(0).getPosition().subtract(nee), 1000))
             .with(new OffscreenCleanComponent())
             .build();
         }
@@ -122,19 +124,21 @@ public class WozniakEntityFactory implements EntityFactory {
     @Spawns("tower1")
     public Entity tower1(SpawnData data){
         FXGL.getGameTimer().runAtInterval(()->{
-            spawn("bullet", data.getX() + 40,data.getY() + 40);
+            spawn("bullet", data.getX(),data.getY());
         }, Duration.millis(3000));
 
         return entityBuilder(data)
             .view("tower1.png")
             .zIndex(25)
-            .scale(0.5, 0.5)
             .anchorFromCenter()
             .onClick(v->{
                 if(FXGL.geti("money") >= 100){
                     FXGL.inc("money", -100);
+                    FXGL.play("build.wav");
                     v.removeFromWorld();
-                    spawn("tower2", v.getX() - 40, v.getY()-40);
+                    spawn("tower2", v.getX(), v.getY());
+                }else{
+                    FXGL.play("notallowed.wav");
                 }
             })
             .build();
@@ -144,7 +148,7 @@ public class WozniakEntityFactory implements EntityFactory {
     public Entity tower2(SpawnData data){
 
         FXGL.getGameTimer().runAtInterval(()->{
-            spawn("bullet", data.getX() + 40,data.getY() + 40);
+            spawn("bullet", data.getX(),data.getY());
         }, Duration.millis(2000));
 
         return entityBuilder(data)
@@ -154,26 +158,29 @@ public class WozniakEntityFactory implements EntityFactory {
             .onClick(v->{
                 if(FXGL.geti("money") >= 150){
                     FXGL.inc("money", -150);
+                    FXGL.play("build.wav");
                     v.removeFromWorld();
-                    spawn("tower3", v.getX() + 60, v.getY());
+                    spawn("tower3", v.getX(), v.getY());
+                }else{
+                    FXGL.play("notallowed.wav");
                 }
             })
-            .scale(0.5, 0.5)
             .build();
     }
 
     @Spawns("tower3")
     public Entity tower3(SpawnData data){
         FXGL.getGameTimer().runAtInterval(()->{
-            spawn("bullet", data.getX() + 40,data.getY() + 40);
+            spawn("bullet", data.getX(),data.getY());
         }, Duration.millis(1000));
-        
 
         return entityBuilder(data)
             .view("tower3.png")
             .anchorFromCenter()
             .zIndex(25)
-            .scale(0.3, 0.3)
+            .onClick(v->{
+                FXGL.play("notallowed.wav");
+            })
             .build();
     }
 }
