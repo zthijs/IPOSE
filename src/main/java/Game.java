@@ -10,14 +10,18 @@ import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
 import static com.almasb.fxgl.dsl.FXGL.spawn;
 
+import com.almasb.fxgl.time.TimerAction;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameTimer;
 
 public class Game extends GameApplication {
 
@@ -46,7 +50,7 @@ public class Game extends GameApplication {
         s.setFullScreenFromStart(true);
         s.setWidth(1280);
         s.setHeight(720);
-        s.setMainMenuEnabled(true);
+        s.setMainMenuEnabled(false);
 
     }
 
@@ -57,6 +61,7 @@ public class Game extends GameApplication {
         // Stel de achtergrond en menu in op specifieke z indexen.
         spawn("background");
         spawn("stoneMenu");
+        spawn("pathEnd",PATH_1[PATH_1.length - 1][0], PATH_1[PATH_1.length - 1][1]);
 
         // Maak op de grid elke tegel niet toegangbaar.
         GRID.forEach(tile -> {
@@ -74,7 +79,11 @@ public class Game extends GameApplication {
             spawn("platform", cords[0], cords[1]);
         }
 
-        spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(3,3);
+
+
+        //spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(3,3);
+
+        startWave(1,10,1000);
 
 
 
@@ -82,7 +91,17 @@ public class Game extends GameApplication {
     }
 
     private Entity spawnEnemy(){
-        return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 100));
+        return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 500));
+    }
+
+    private void startWave(int waveNumber, int enemyAmount, int interval){
+        AtomicInteger count = new AtomicInteger();
+        FXGL.getGameTimer().runAtInterval(() -> {
+            if(count.get() < enemyAmount){
+                count.set(count.get() + 1);
+                spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
+            }
+        }, Duration.millis(interval));
     }
 
 
@@ -90,7 +109,7 @@ public class Game extends GameApplication {
     protected void initPhysics(){
         FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.PATH_END) {
             @Override
-            protected void onCollision(Entity enemy, Entity endpoint) {
+            protected void onCollision(Entity enemy, Entity path_end) {
                 FXGL.play("beep.wav");
                 enemy.removeFromWorld();
                 FXGL.inc("score", -5);

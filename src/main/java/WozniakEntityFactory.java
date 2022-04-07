@@ -1,4 +1,6 @@
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
+
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
@@ -64,10 +66,11 @@ public class WozniakEntityFactory implements EntityFactory {
 
     @Spawns("pathEnd")
     public Entity pathEnd(SpawnData data){
+
         return entityBuilder(data)
-            .viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT))
-            .at(1040,480)
+            .viewWithBBox(new Rectangle(80,80,Color.RED))
             .type(EntityTypes.PATH_END)
+                .zIndex(5000)
             .with(new CollidableComponent(true))
             .build();
     }
