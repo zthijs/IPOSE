@@ -11,9 +11,6 @@ import com.almasb.fxgl.physics.CollisionHandler;
 import static com.almasb.fxgl.dsl.FXGL.spawn;
 
 import com.almasb.fxgl.time.TimerAction;
-
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
@@ -85,9 +82,6 @@ public class Game extends GameApplication {
         startWave(1,10,1000);
         startWave(1,10,1000);
 
-
-
-
     }
 
     private Entity spawnEnemy(){
@@ -96,21 +90,14 @@ public class Game extends GameApplication {
 
     private void startWave(int waveNumber, int enemyAmount, int interval){
         AtomicInteger count = new AtomicInteger();
-        // FXGL.getGameTimer().runAtInterval(() -> {
-        //     if(count.get() < enemyAmount){
-        //         count.set(count.get() + 1);
-        //         spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
-        //     }
-        // }, Duration.millis(interval));
-
-        getGameTimer().runAtIntervalWhile(()->{
-            count.set(count.get() + 1);
-            spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
-
-        }, Duration.millis(interval), count.get() < enemyAmount);
+        FXGL.getGameTimer().runAtInterval(() -> {
+            if(count.get() < enemyAmount){
+                count.set(count.get() + 1);
+                spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
+            }
+        }, Duration.millis(interval));
 
     }
-
 
 
     @Override
@@ -154,7 +141,7 @@ public class Game extends GameApplication {
     protected void initGameVars(Map<String, Object> vars){
         vars.put("score",0);
         vars.put("health",20);
-        vars.put("money",100);
+        vars.put("money",5000);
     }
 
     //key input
