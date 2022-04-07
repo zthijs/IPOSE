@@ -115,6 +115,15 @@ public class Game extends GameApplication {
 
             }
         });
+
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.BULLET) {
+            @Override
+            protected void onCollision(Entity enemy, Entity bull) {
+                System.out.println("beep");
+                bull.removeFromWorld();
+                enemy.removeFromWorld();
+            }
+        });
     }
 
     private void makeLabel(String labelContents, int Xcoord, int Ycoord, boolean var){
