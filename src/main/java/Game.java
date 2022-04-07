@@ -3,21 +3,21 @@ import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
-import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.pathfinding.CellState;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
+
+import static com.almasb.fxgl.dsl.FXGL.run;
 import static com.almasb.fxgl.dsl.FXGL.spawn;
 
 import com.almasb.fxgl.time.TimerAction;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
@@ -29,6 +29,8 @@ public class Game extends GameApplication {
     private final int CELL_HEIGHT = 80;
 
     private final AStarGrid GRID = new AStarGrid(1280/CELL_WIDTH,720/CELL_HEIGHT);
+
+    private int currentWave;
 
     private final int [][] PATH_1 = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
     private final int [][] PATH_2 = {{0,640},{80, 640}, {120, 640}, {160, 640},{160,560},{160,480},{160,400}, {240,240},{240,320},{240,400},{240,320},{320,240},{400,240},{480,240},{480,320},{480,240},{480,400},{480,480},{560,480},{640,480},{640,400},{640,320},{640,240},{640,160},{560,160},{400,240},{560,80},{560,0},{640,0},{720,0},{800,0},{880,0},{920,0}};
@@ -79,26 +81,27 @@ public class Game extends GameApplication {
             spawn("platform", cords[0], cords[1]);
         }
 
-        startWave(1,10,1000);
-        startWave(1,10,1000);
-
+        startWave(10,2000,0);
+        startWave(8,1600,35);
+        startWave(16,1000,35+28);
+        startWave(30,700,35+28+31);
+        startWave(100,500,35+28+31+36);
     }
 
     private Entity spawnEnemy(){
         return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 100));
     }
 
-    private void startWave(int waveNumber, int enemyAmount, int interval){
+    private void startWave(int enemyAmount, int interval, int delay){
         AtomicInteger count = new AtomicInteger();
-        FXGL.getGameTimer().runAtInterval(() -> {
-            if(count.get() < enemyAmount){
+        FXGL.runOnce(() -> {
+            FXGL.inc("wave",1);
+            FXGL.run(() -> {
                 count.set(count.get() + 1);
                 spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
-            }
-        }, Duration.millis(interval));
-
+            }, Duration.millis(interval), enemyAmount);
+        }, Duration.seconds(delay));
     }
-
 
     @Override
     protected void initPhysics(){
@@ -108,6 +111,7 @@ public class Game extends GameApplication {
                 FXGL.play("beep.wav");
                 enemy.removeFromWorld();
                 FXGL.inc("health",-1);
+
             }
         });
 
@@ -143,23 +147,26 @@ public class Game extends GameApplication {
         makeLabel("Score: ",1016,12,false);
         makeLabel("Health: ",1016,44,false);
         makeLabel("Money: ",1016,76,false);
+        makeLabel("Wave: ",1016,300,false);
+
         makeLabel("score",1090,12,true);
         makeLabel("health",1090,44,true);
         makeLabel("money",1090,76,true);
+        makeLabel("wave",1090,300,true);
 
-        makeLabel("Toren 1: 50", 1016, 120, false);
-        makeLabel("Toren 2: 100", 1016, 145, false);
-        makeLabel("Toren 3: 150", 1016, 170, false);
-
-
+        makeLabel("Toren 1: 50",1016,120,false);
+        makeLabel("Toren 2: 100",1016,152,false);
+        makeLabel("Toren 3: 200",1016,184,false);
     }
 
     @Override
     protected void initGameVars(Map<String, Object> vars){
         vars.put("score",0);
         vars.put("health",20);
-        vars.put("money",200);
+        vars.put("money",150);
+        vars.put("wave",0);
     }
+
 
     //key input
     @Override
