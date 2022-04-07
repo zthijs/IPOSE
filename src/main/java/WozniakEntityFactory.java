@@ -99,7 +99,7 @@ public class WozniakEntityFactory implements EntityFactory {
     public Entity newBullet(SpawnData data) {
 
 
-        Point2D closest = FXGL.getGameWorld().getSingleton(EntityTypes.ENEMY).getPosition().subtract(tower1().getPosition())
+        Point2D closest = FXGL.getGameWorld().getSingleton(EntityTypes.ENEMY).getPosition();
 
         return entityBuilder(data)
                 .type(EntityTypes.BULLET)
