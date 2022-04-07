@@ -8,18 +8,17 @@ import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
 
-import static com.almasb.fxgl.dsl.FXGL.run;
-import static com.almasb.fxgl.dsl.FXGL.spawn;
-
 import com.almasb.fxgl.time.TimerAction;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.almasb.fxgl.dsl.FXGL.*;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameTimer;
 
@@ -36,6 +35,8 @@ public class Game extends GameApplication {
     private final int [][] PATH_2 = {{0,640},{80, 640}, {120, 640}, {160, 640},{160,560},{160,480},{160,400}, {240,240},{240,320},{240,400},{240,320},{320,240},{400,240},{480,240},{480,320},{480,240},{480,400},{480,480},{560,480},{640,480},{640,400},{640,320},{640,240},{640,160},{560,160},{400,240},{560,80},{560,0},{640,0},{720,0},{800,0},{880,0},{920,0}};
 
     public final int [][] TOWERS_1 = {{80, 160},{480, 400},{880, 560}};
+
+    private boolean gameActive = true;
 
     public static void main (String[] args) {
         launch(args);
@@ -81,11 +82,24 @@ public class Game extends GameApplication {
             spawn("platform", cords[0], cords[1]);
         }
 
-        startWave(10,2000,0);
+        endGame();
+
+        startWave(10,1000,0);
         startWave(8,1600,35);
         startWave(16,1000,35+28);
         startWave(30,700,35+28+31);
         startWave(100,500,35+28+31+36);
+    }
+
+    private void endGame(){
+        FXGL.getGameTimer().runAtInterval(() -> {
+            if (FXGL.geti("health") <= 0 && gameActive == true){
+                gameActive = false;
+                getDialogService().showInputBox("This is an input box. You can type stuff...", answer -> {
+                    System.out.println("You typed: "+ answer);
+                });
+            }
+        }, Duration.millis(100));
     }
 
     private Entity spawnEnemy(){
@@ -93,14 +107,16 @@ public class Game extends GameApplication {
     }
 
     private void startWave(int enemyAmount, int interval, int delay){
-        AtomicInteger count = new AtomicInteger();
-        FXGL.runOnce(() -> {
-            FXGL.inc("wave",1);
-            FXGL.run(() -> {
-                count.set(count.get() + 1);
-                spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
-            }, Duration.millis(interval), enemyAmount);
-        }, Duration.seconds(delay));
+        if (gameActive == true){
+            AtomicInteger count = new AtomicInteger();
+            FXGL.runOnce(() -> {
+                FXGL.inc("wave",1);
+                FXGL.run(() -> {
+                    count.set(count.get() + 1);
+                    spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
+                }, Duration.millis(interval), enemyAmount);
+            }, Duration.seconds(delay));
+        }
     }
 
     @Override
@@ -112,7 +128,6 @@ public class Game extends GameApplication {
                 enemy.removeFromWorld();
                 FXGL.inc("score", -5);
                 FXGL.inc("health",-1);
-
             }
         });
 
@@ -122,6 +137,8 @@ public class Game extends GameApplication {
                 System.out.println("beep");
                 bull.removeFromWorld();
                 enemy.removeFromWorld();
+                FXGL.inc("score",5);
+                FXGL.inc("money",10);
             }
         });
     }
