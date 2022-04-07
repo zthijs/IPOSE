@@ -87,7 +87,7 @@ public class Game extends GameApplication {
     }
 
     private Entity spawnEnemy(){
-        return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 500));
+        return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 10));
     }
 
     private void startWave(int waveNumber, int enemyAmount, int interval){
@@ -111,6 +111,15 @@ public class Game extends GameApplication {
                 enemy.removeFromWorld();
                 FXGL.inc("score", -5);
                 FXGL.inc("health",-1);
+            }
+        });
+
+        FXGL.getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityTypes.ENEMY, EntityTypes.BULLET) {
+            @Override
+            protected void onCollision(Entity enemy, Entity bull) {
+                System.out.println("beep");
+                bull.removeFromWorld();
+                enemy.removeFromWorld();
             }
         });
     }
