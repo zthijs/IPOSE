@@ -63,41 +63,28 @@ public class Game extends GameApplication {
             tile.setState(CellState.NOT_WALKABLE);
         });
         
-        spawn("enemy", new SpawnData().put("grid", GRID).put("speed", 100)).getComponent(AStarMoveComponent.class).moveToCell(3,3);
-
         // Maak alle tegels op het pad toegangbaar.
         for (int[] cords : PATH_1) {
-            genMudPiece(cords[0],cords[1]);
+            spawn("mudPiece", cords[0], cords[1]);
             GRID.get(cords[0]/CELL_WIDTH,cords[1]/CELL_HEIGHT).setState(CellState.WALKABLE);
         }
 
         // Plaats de torens langs het pad.
         for (int[] cords: TOWERS_1) {
-            entityBuilder().view("platform.png").zIndex(25).at(cords[0],cords[1]).onClick(v->{
-                System.out.println("Gedrukt");
-                v.setOpacity(0.5);
-            }).buildAndAttach();
+            spawn("platform", cords[0], cords[1]);
         }
 
+        spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(3,3);
 
-        FXGL.entityBuilder().viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT)).at(1040,480)
-        .type(EntityTypes.PATH_END)
-        .with(new CollidableComponent(true))
-        .buildAndAttach();
+
 
 
     }
 
-    private void genMudPiece(int x, int y){
-
-        entityBuilder()
-                .view("mud.png")
-                .zIndex(2).at(x,y)
-                .onClick(f->{
-
-                })
-                .buildAndAttach();
+    private Entity spawnEnemy(){
+        return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 100));
     }
+
 
     @Override
     protected void initPhysics(){

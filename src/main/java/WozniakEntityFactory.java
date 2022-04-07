@@ -8,6 +8,9 @@ import com.almasb.fxgl.pathfinding.CellMoveComponent;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+
 public class WozniakEntityFactory implements EntityFactory {
 
     private static final String HEIKO_IMAGE = "heiko.png";
@@ -41,13 +44,39 @@ public class WozniakEntityFactory implements EntityFactory {
         AStarGrid grid = data.get("grid");
         int speed = data.get("speed");
 
-        return entityBuilder()
-        .viewWithBBox(HEIKO_IMAGE).scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
-        .with(new CellMoveComponent(80,80,speed))
-        .with(new AStarMoveComponent(grid))
-        .zIndex(5).at(-160,0).anchorFromCenter()
-        .type(EntityTypes.ENEMY)
-        .with(new CollidableComponent(true))
-        .build();
+        return entityBuilder(data)
+            .viewWithBBox(HEIKO_IMAGE).scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
+            .with(new CellMoveComponent(80,80,speed))
+            .with(new AStarMoveComponent(grid))
+            .zIndex(120)
+            .anchorFromCenter()
+            .type(EntityTypes.ENEMY)
+            .build();
+    }
+
+    @Spawns("mudPiece")
+    public Entity mudPiece (SpawnData data){
+        return entityBuilder(data)
+            .view("mud.png")
+            .zIndex(2)
+            .build();
+    }
+
+    @Spawns("pathEnd")
+    public Entity pathEnd(SpawnData data){
+        return entityBuilder(data)
+            .viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT))
+            .at(1040,480)
+            .type(EntityTypes.PATH_END)
+            .with(new CollidableComponent(true))
+            .build();
+    }
+
+    @Spawns("platform")
+    public Entity platform(SpawnData data){
+        return entityBuilder(data)
+            .view("platform.png")
+            .zIndex(25)
+            .build();
     }
 }
