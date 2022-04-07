@@ -85,7 +85,7 @@ public class Game extends GameApplication {
     }
 
     private Entity spawnEnemy(){
-        return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 10));
+        return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 100));
     }
 
     private void startWave(int waveNumber, int enemyAmount, int interval){
@@ -107,7 +107,6 @@ public class Game extends GameApplication {
             protected void onCollision(Entity enemy, Entity path_end) {
                 FXGL.play("beep.wav");
                 enemy.removeFromWorld();
-                FXGL.inc("score", -5);
                 FXGL.inc("health",-1);
             }
         });
@@ -116,6 +115,9 @@ public class Game extends GameApplication {
             @Override
             protected void onCollision(Entity enemy, Entity bull) {
                 System.out.println("beep");
+                FXGL.inc("score", 5);
+                FXGL.inc("money", 25);
+
                 bull.removeFromWorld();
                 enemy.removeFromWorld();
             }
@@ -156,7 +158,7 @@ public class Game extends GameApplication {
     protected void initGameVars(Map<String, Object> vars){
         vars.put("score",0);
         vars.put("health",20);
-        vars.put("money",5000);
+        vars.put("money",200);
     }
 
     //key input
