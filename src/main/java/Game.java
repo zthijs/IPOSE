@@ -11,6 +11,9 @@ import com.almasb.fxgl.physics.CollisionHandler;
 import static com.almasb.fxgl.dsl.FXGL.spawn;
 
 import com.almasb.fxgl.time.TimerAction;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
@@ -29,8 +32,6 @@ public class Game extends GameApplication {
     private final int CELL_HEIGHT = 80;
 
     private final AStarGrid GRID = new AStarGrid(1280/CELL_WIDTH,720/CELL_HEIGHT);
-
-    boolean nextWave = true;
 
     private final int [][] PATH_1 = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
     private final int [][] PATH_2 = {{0,640},{80, 640}, {120, 640}, {160, 640},{160,560},{160,480},{160,400}, {240,240},{240,320},{240,400},{240,320},{320,240},{400,240},{480,240},{480,320},{480,240},{480,400},{480,480},{560,480},{640,480},{640,400},{640,320},{640,240},{640,160},{560,160},{400,240},{560,80},{560,0},{640,0},{720,0},{800,0},{880,0},{920,0}};
@@ -81,13 +82,9 @@ public class Game extends GameApplication {
             spawn("platform", cords[0], cords[1]);
         }
 
-
-
-        //spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(3,3);
-
         startWave(1,10,1000);
-        startWave(2,7,800);
-        startWave(3,12,1100);
+        startWave(1,10,1000);
+
 
 
 
@@ -97,28 +94,22 @@ public class Game extends GameApplication {
         return spawn("enemy", new SpawnData(-160,0).put("grid", GRID).put("speed", 500));
     }
 
-    private void startWave(int waveNumber,int enemyAmount,int interval){
-        while(nextWave){
-            nextWave = false;
-            createWave(waveNumber,enemyAmount,interval);
-        }
-    }
-
-    private void createWave(int waveNumber, int enemyAmount, int interval){
+    private void startWave(int waveNumber, int enemyAmount, int interval){
         AtomicInteger count = new AtomicInteger();
-        FXGL.getGameTimer().runAtInterval(() -> {
-            if(count.get() < enemyAmount){
-                count.set(count.get() + 1);
-                spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
-                System.out.println(count + " " + enemyAmount);
-            }
-            if(count.get() == enemyAmount){
-                System.out.println("hoi");
-                nextWave = true;
-            }
-        }, Duration.millis(interval));
-    }
+        // FXGL.getGameTimer().runAtInterval(() -> {
+        //     if(count.get() < enemyAmount){
+        //         count.set(count.get() + 1);
+        //         spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
+        //     }
+        // }, Duration.millis(interval));
 
+        getGameTimer().runAtIntervalWhile(()->{
+            count.set(count.get() + 1);
+            spawnEnemy().getComponent(AStarMoveComponent.class).moveToCell(PATH_1[PATH_1.length - 1][0]/80, PATH_1[PATH_1.length - 1][1]/80);
+
+        }, Duration.millis(interval), count.get() < enemyAmount);
+
+    }
 
 
 

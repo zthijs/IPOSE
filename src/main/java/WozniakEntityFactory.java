@@ -9,6 +9,8 @@ import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.pathfinding.CellMoveComponent;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
+import static com.almasb.fxgl.dsl.FXGL.spawn;
+
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -50,9 +52,9 @@ public class WozniakEntityFactory implements EntityFactory {
             .viewWithBBox(HEIKO_IMAGE).scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
             .with(new CellMoveComponent(80,80,speed))
             .with(new AStarMoveComponent(grid))
-            .with(new CollidableComponent(true))
-            .zIndex(120)
+            .zIndex(15)
             .anchorFromCenter()
+            .collidable()
             .type(EntityTypes.ENEMY)
             .build();
     }
@@ -69,10 +71,10 @@ public class WozniakEntityFactory implements EntityFactory {
     public Entity pathEnd(SpawnData data){
 
         return entityBuilder(data)
-            .viewWithBBox(new Rectangle(80,80,Color.RED))
+            .viewWithBBox(new Rectangle(80,80,Color.TRANSPARENT))
             .type(EntityTypes.PATH_END)
-                .zIndex(5000)
-            .with(new CollidableComponent(true))
+            .zIndex(0)
+            .collidable()
             .build();
     }
 
@@ -81,6 +83,28 @@ public class WozniakEntityFactory implements EntityFactory {
         return entityBuilder(data)
             .view("platform.png")
             .zIndex(25)
+            .onClick(v->{
+                v.removeFromWorld();
+                spawn("tower1", v.getX(), v.getY());
+            })
+            .build();
+    }
+
+    @Spawns("tower1")
+    public Entity tower1(SpawnData data){
+        return entityBuilder(data)
+            .view("tower1.png")
+            .zIndex(25)
+            .scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
+            .build();
+    }
+
+    @Spawns("tower2")
+    public Entity tower2(SpawnData data){
+        return entityBuilder(data)
+            .view("tower1.png")
+            .zIndex(25)
+            .scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
             .build();
     }
 }
