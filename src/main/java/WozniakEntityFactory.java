@@ -10,10 +10,15 @@ import com.almasb.fxgl.pathfinding.CellMoveComponent;
 import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import static com.almasb.fxgl.dsl.FXGL.spawn;
+import com.almasb.fxgl.dsl.components.ProjectileComponent;
+import javafx.geometry.Point2D;
+import static com.almasb.fxgl.dsl.FXGL.getInput;
 
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 public class WozniakEntityFactory implements EntityFactory {
 
@@ -113,6 +118,23 @@ public class WozniakEntityFactory implements EntityFactory {
         return entityBuilder(data)
                 .view("tower1.png")
                 .zIndex(100)
+                .build();
+    }
+
+    @Spawns("projectile")
+    public Entity newProjectile(SpawnData data) {
+        var view = new Rectangle(30, 3, Color.LIGHTBLUE);
+        Point2D direction = enemy(data).getPosition();
+        view.setStroke(Color.RED);
+        view.setArcWidth(15);
+        view.setArcHeight(10);
+
+        return entityBuilder(data)
+                .type(EntityTypes.PROJECTILE)
+                .viewWithBBox(view)
+                .collidable()
+                .zIndex(200)
+                .with(new ProjectileComponent(new Point2D(200, 200), 160))
                 .build();
     }
 }
