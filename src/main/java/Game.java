@@ -135,6 +135,12 @@ public class Game extends GameApplication {
         makeLabel("score",1090,12,true);
         makeLabel("health",1090,44,true);
         makeLabel("money",1090,76,true);
+
+        makeLabel("Toren 1: 50", 1016, 120, false);
+        makeLabel("Toren 2: 100", 1016, 145, false);
+        makeLabel("Toren 3: 150", 1016, 170, false);
+
+
     }
 
     @Override

@@ -13,6 +13,7 @@ import static com.almasb.fxgl.dsl.FXGL.spawn;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 public class WozniakEntityFactory implements EntityFactory {
 
@@ -101,6 +102,11 @@ public class WozniakEntityFactory implements EntityFactory {
 
     @Spawns("tower1")
     public Entity tower1(SpawnData data){
+
+        FXGL.getGameTimer().runAtInterval(()->{
+            System.out.println("yeet");
+        }, Duration.seconds(2));
+
         return entityBuilder(data)
             .view("tower1.png")
             .zIndex(25)
