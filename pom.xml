@@ -38,7 +38,8 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>Game.java</mainClass>
+                            <mainClass>Game</mainClass>
+                            <attribute name="Main-Class" value="Game"/>
                         </manifest>
                     </archive>
                 </configuration>
