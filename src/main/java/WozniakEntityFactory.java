@@ -50,6 +50,7 @@ public class WozniakEntityFactory implements EntityFactory {
             .viewWithBBox(HEIKO_IMAGE).scale(MINIMIZE_FACTOR_TO_SATISFACTION, MINIMIZE_FACTOR_TO_SATISFACTION)
             .with(new CellMoveComponent(80,80,speed))
             .with(new AStarMoveComponent(grid))
+            .with(new CollidableComponent(true))
             .zIndex(120)
             .anchorFromCenter()
             .type(EntityTypes.ENEMY)
