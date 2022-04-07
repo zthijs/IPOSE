@@ -1,6 +1,8 @@
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.dsl.components.OffscreenCleanComponent;
+import com.almasb.fxgl.dsl.components.ProjectileComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
@@ -10,7 +12,7 @@ import com.almasb.fxgl.pathfinding.astar.AStarGrid;
 import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import static com.almasb.fxgl.dsl.FXGL.spawn;
 
-
+import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
@@ -94,18 +96,24 @@ public class WozniakEntityFactory implements EntityFactory {
     }
 
     @Spawns("bullet")
-    public Entity bullet(SpawnData data){
+    public Entity newBullet(SpawnData data) {
+        Entity closest = FXGL.getGameWorld().getClosestEntity(parent, e -> e.isType(EntityTypes.ENEMY));
+
         return entityBuilder(data)
-            .type(EntityTypes.BULLET)
-            .build();
+                .type(EntityTypes.BULLET)
+                .viewWithBBox(new Rectangle(10, 2, Color.BLACK))
+                .collidable()
+                .with(new ProjectileComponent(direction, 1000))
+                .with(new OffscreenCleanComponent())
+                .build();
     }
 
     @Spawns("tower1")
     public Entity tower1(SpawnData data){
 
         FXGL.getGameTimer().runAtInterval(()->{
-            System.out.println("yeet");
-        }, Duration.seconds(2));
+            spawn("bullet");
+        }, Duration.seconds(1));
 
         return entityBuilder(data)
             .view("tower1.png")
