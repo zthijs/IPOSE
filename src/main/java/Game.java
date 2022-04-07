@@ -9,10 +9,16 @@ import com.almasb.fxgl.pathfinding.astar.AStarMoveComponent;
 import com.almasb.fxgl.physics.CollisionHandler;
 
 import com.almasb.fxgl.time.TimerAction;
+
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -37,6 +43,8 @@ public class Game extends GameApplication {
     public final int [][] TOWERS_1 = {{80, 160},{480, 400},{880, 560}};
 
     private boolean gameActive = true;
+
+    ArrayList<Player> scores = new ArrayList<>();
 
     public static void main (String[] args) {
         launch(args);
@@ -95,8 +103,20 @@ public class Game extends GameApplication {
         FXGL.getGameTimer().runAtInterval(() -> {
             if (FXGL.geti("health") <= 0 && gameActive == true){
                 gameActive = false;
-                getDialogService().showInputBox("This is an input box. You can type stuff...", answer -> {
-                    System.out.println("You typed: "+ answer);
+                getDialogService().showInputBox("Je bent dood! Je hebt een score van " + FXGL.geti("score") + " punten! Wat is je naam", answer -> {
+                    System.out.println(answer);
+                    scores.add(new Player(answer, FXGL.geti("score")));
+
+                    VBox content = new VBox();
+
+                    for (Player p : scores) {
+                        content.getChildren().add(getUIFactoryService().newText(p.getName() + " - " + p.getScore()));  
+                    }
+                    
+Button btnClose = getUIFactoryService().newButton("Sluit");
+btnClose.setPrefWidth(300);
+
+getDialogService().showBox("This is a customizable box", content, btnClose);
                 });
             }
         }, Duration.millis(100));
@@ -179,7 +199,7 @@ public class Game extends GameApplication {
     @Override
     protected void initGameVars(Map<String, Object> vars){
         vars.put("score",0);
-        vars.put("health",20);
+        vars.put("health",0);
         vars.put("money",150);
         vars.put("wave",0);
     }
