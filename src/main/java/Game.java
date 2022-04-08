@@ -31,6 +31,8 @@ public class Game extends GameApplication {
 	private final int CELL_WIDTH = 80;
 	private final int CELL_HEIGHT = 80;
 
+	private int killcount = 0;
+
 	private final AStarGrid GRID = new AStarGrid(1280 / CELL_WIDTH, 720 / CELL_HEIGHT);
 
 	private final int [][] PATH = {{0, 80}, {80,80},{160, 80}, {160, 160}, {160, 240},{240, 240},{320,240},{320, 320},{320, 400}, {320,480}, {400,480}, {480,480},{560, 480},{640, 480},{720, 480},{800, 480},{880, 480},{960, 480},{1040, 480}};
@@ -86,12 +88,12 @@ public class Game extends GameApplication {
 			spawn("platform", cords[0], cords[1]);
 		}
 
-		startWave(10, 1000, 0, 100);
+		startWave(10, 1050, 0, 100);
 		startWave(8, 500, 35, 200);
-		startWave(20, 300, 53, 100);
-		startWave(30, 700, 85, 150);
-        startWave(40, 300, 120, 100);
-		startWave(50, 300, 130, 100);
+		startWave(18, 300, 53, 100);
+		startWave(30, 700, 80, 220);
+        startWave(40, 300, 110, 180);
+		startWave(50, 300, 130, 300);
 
 	}
 
@@ -116,9 +118,17 @@ public class Game extends GameApplication {
 	}
 
 	public void onUpdate(double tpf) {
-		if (FXGL.geti("health")<= 0) {
+		if (FXGL.geti("health")<= 0 || killcount == 156) {
 			gameActive = false;
-			getDialogService().showInputBox("Je bent dood! Je hebt een score van " + FXGL.geti("score") + " punten! Wat is je naam?", answer -> {
+			String string;
+			if(FXGL.geti("health")<= 0){
+				string = "Je bent dood!";
+			} else if(killcount == 158){
+				string = "Je hebt het gehaald!";
+			} else {
+				string = "";
+			}
+			getDialogService().showInputBox(string + " Je hebt een score van " + FXGL.geti("score") + " punten! Wat is je naam?", answer -> {
                 VBox content = new VBox();
 
                 try {
@@ -159,6 +169,7 @@ public class Game extends GameApplication {
 			protected void onCollision(Entity enemy, Entity path_end) {
 				FXGL.play("beep.wav");
 				enemy.removeFromWorld();
+				killcount++;
 				FXGL.inc("health", -1);
 			}
 		});
@@ -171,6 +182,7 @@ public class Game extends GameApplication {
 
 				bull.removeFromWorld();
 				enemy.removeFromWorld();
+				killcount++;
 			}
 		});
 	}
@@ -180,7 +192,8 @@ public class Game extends GameApplication {
 		Label label = new Label(labelContents);
 		label.setStyle(
 			"-fx-font-size: 20; " +
-			"-fx-text-fill: white;");
+			"-fx-text-fill: white;" +
+			"-fx-font-weight: bold");
 		label.setFont(Font.loadFont("resources/fonts/pixel.ttf", 20));
 		label.setTranslateX(Xcoord);
 		label.setTranslateY(Ycoord);
@@ -195,16 +208,16 @@ public class Game extends GameApplication {
 		makeLabel("Score: ", 1016, 12, false);
 		makeLabel("Health: ", 1016, 44, false);
 		makeLabel("Money: ", 1016, 76, false);
-		makeLabel("Level: ", 1016, 300, false);
+		makeLabel("Wave: ", 1016, 300, false);
 
 		makeLabel("score", 1090, 12, true);
 		makeLabel("health", 1090, 44, true);
 		makeLabel("money", 1090, 76, true);
 		makeLabel("wave", 1090, 300, true);
 
-		makeLabel("Toren 1: 50", 1016, 120, false);
-		makeLabel("Toren 2: 100", 1016, 152, false);
-		makeLabel("Toren 3: 200", 1016, 184, false);
+		makeLabel("Tower 1: 50", 1016, 120, false);
+		makeLabel("Tower 2: 150", 1016, 152, false);
+		makeLabel("Tower 3: 400", 1016, 184, false);
 	}
 
 	@Override

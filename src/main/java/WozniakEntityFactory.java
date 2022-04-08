@@ -39,7 +39,7 @@ public class WozniakEntityFactory implements EntityFactory {
     public Entity stoneMenu(SpawnData data){
         return entityBuilder(data)
             .view("stone.jpg")
-            .zIndex(30)
+            .zIndex(3000)
             .at(1000,0)
             .scale(2, 2)
             .build();
@@ -112,8 +112,8 @@ public class WozniakEntityFactory implements EntityFactory {
             .type(EntityTypes.BULLET)
             .viewWithBBox("bullit.png")
             .collidable()
-            .zIndex(6000)
-            .with(new ProjectileComponent(closest.get(0).getPosition().subtract(nee), 1000))
+            .zIndex(1000)
+            .with(new ProjectileComponent(closest.get(0).getPosition().subtract(nee), 1250))
             .with(new OffscreenCleanComponent())
             .build();
         }
@@ -132,8 +132,8 @@ public class WozniakEntityFactory implements EntityFactory {
             .zIndex(25)
             .anchorFromCenter()
             .onClick(v->{
-                if(FXGL.geti("money") >= 100){
-                    FXGL.inc("money", -100);
+                if(FXGL.geti("money") >= 150){
+                    FXGL.inc("money", -150);
                     FXGL.play("build.wav");
                     v.removeFromWorld();
                     spawn("tower2", v.getX(), v.getY());
@@ -156,8 +156,8 @@ public class WozniakEntityFactory implements EntityFactory {
             .anchorFromCenter()
             .zIndex(25)
             .onClick(v->{
-                if(FXGL.geti("money") >= 150){
-                    FXGL.inc("money", -150);
+                if(FXGL.geti("money") >= 400){
+                    FXGL.inc("money", -400);
                     FXGL.play("build.wav");
                     v.removeFromWorld();
                     spawn("tower3", v.getX(), v.getY());
